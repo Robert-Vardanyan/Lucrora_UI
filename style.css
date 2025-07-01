@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+  font-family: 'Segoe UI', sans-serif;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+#continueBtn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  background: #00b894;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
