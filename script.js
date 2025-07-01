@@ -20,7 +20,7 @@ window.addEventListener('DOMContentLoaded', () => {
   welcome.textContent = `Привет, ${user.first_name || 'Пользователь'}!`;
 
   // Отправка initData на сервер для валидации и получения баланса
-  fetch('http://0.0.0.0:8000/api/init', {
+  fetch('https://lucrora.osc-fr1.scalingo.io/api/init', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ initData: Telegram.WebApp.initData })
