@@ -38,6 +38,9 @@ window.addEventListener('DOMContentLoaded', () => {
   })
   .catch(error => {
     console.error("🔴 Ошибка при запросе:", error);
+    console.log("esia xndir talis", error);
+    console.log("tg.initData:", tg.initData);
+    console.log("res:", res.json());
     welcome.textContent = '❌ Ошибка соединения с сервером';
   });
 });
