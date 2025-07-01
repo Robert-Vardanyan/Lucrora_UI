@@ -20,24 +20,17 @@ window.addEventListener('DOMContentLoaded', () => {
   welcome.textContent = `Привет, ${user.first_name || 'Пользователь'}!`;
 
   // Отправка initData на сервер для валидации и получения баланса
-  fetch('https://your-backend.com/api/init', {
+  fetch('http://0.0.0.0:8000/api/init', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'initData=' + tg.initData
-    },
-    body: JSON.stringify({ initData: tg.initData })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData: Telegram.WebApp.initData })
   })
   .then(res => res.json())
   .then(data => {
-    mainBalance.textContent = data.main_balance ?? '0';
-    bonusBalance.textContent = data.bonus_balance ?? '0';
+    // Отобразить баланс и др.
   })
-  .catch(err => {
-    console.error('Ошибка загрузки данных:', err);
-    mainBalance.textContent = 'Ошибка';
-    bonusBalance.textContent = 'Ошибка';
-  });
+  .catch(console.error);
+
 });
 
 function buyPackage() {
