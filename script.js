@@ -9,7 +9,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.body.innerHTML = `
       <div style="text-align:center;margin-top:100px;">
         <h2>❌ Пожалуйста, откройте приложение внутри Telegram</h2>
-        <a href="https://t.me/your_bot_username" target="_blank">Запустить бота</a>
+        <a href="https://t.me/lucrora_bot" target="_blank">Запустить бота</a>
       </div>
     `;
     return;
@@ -33,7 +33,7 @@ window.addEventListener('DOMContentLoaded', () => {
       bonusBalance.textContent = `Бонусный баланс: ${data.bonus_balance}₽`;
       mainSection.style.display = 'block';
     } else {
-      welcome.textContent = '❌ Не удалось получить данные';
+      welcome.textContent = `❌ Не удалось получить данные ${data}`;
     }
   })
   .catch(error => {
