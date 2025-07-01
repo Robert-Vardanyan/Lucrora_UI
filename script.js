@@ -1,7 +1,6 @@
 window.addEventListener('DOMContentLoaded', () => {
   const tg = window.Telegram.WebApp;
 
-  // Проверка, что открыто через Telegram
   if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
     document.body.innerHTML = `
       <div style="text-align:center;margin-top:100px;">
@@ -16,31 +15,39 @@ window.addEventListener('DOMContentLoaded', () => {
   const welcome = document.getElementById('welcome');
   const mainBalance = document.getElementById('main-balance');
   const bonusBalance = document.getElementById('bonus-balance');
+  const mainSection = document.getElementById('main');
 
-  welcome.textContent = `Привет, ${user.first_name || 'Пользователь'}!`;
+  welcome.textContent = `👋 Привет, ${user.first_name || 'Пользователь'}!`;
 
-  // Отправка initData на сервер для валидации и получения баланса
   fetch('https://lucrora.osc-fr1.scalingo.io/api/init', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData: Telegram.WebApp.initData })
+    body: JSON.stringify({ initData: tg.initData })
   })
   .then(res => res.json())
   .then(data => {
-    // Отобразить баланс и др.
+    if (data.ok) {
+      mainBalance.textContent = `Основной баланс: ${data.main_balance}₽`;
+      bonusBalance.textContent = `Бонусный баланс: ${data.bonus_balance}₽`;
+      mainSection.style.display = 'block';
+    } else {
+      welcome.textContent = '❌ Не удалось получить данные';
+    }
   })
-  .catch(console.error);
-
+  .catch(error => {
+    console.error("Ошибка при запросе:", error);
+    welcome.textContent = '❌ Ошибка соединения с сервером';
+  });
 });
 
 function buyPackage() {
-  alert("Здесь будет покупка пакетов");
+  alert("🛒 Здесь будет покупка пакетов");
 }
 
 function playGames() {
-  alert("Игры в разработке");
+  alert("🎮 Игры в разработке");
 }
 
 function withdraw() {
-  alert("Создание заявки на вывод");
+  alert("💸 Создание заявки на вывод");
 }
