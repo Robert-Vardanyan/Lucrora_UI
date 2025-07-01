@@ -33,7 +33,7 @@ window.addEventListener('DOMContentLoaded', () => {
       bonusBalance.textContent = `Бонусный баланс: ${data.bonus_balance}₽`;
       mainSection.style.display = 'block';
     } else {
-      welcome.textContent = `❌ Не удалось получить данные ${data}`;
+      welcome.textContent = `❌ Не удалось получить данные ${tg.initData}`;
     }
   })
   .catch(error => {
