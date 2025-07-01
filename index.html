@@ -3,16 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Добро пожаловать</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <title>ZC Bot Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <div class="container">
-    <h1>👋 Добро пожаловать!</h1>
-    <p id="username">Загрузка...</p>
-    <button id="continueBtn">Продолжить</button>
+    <h1>📊 ZC Dashboard</h1>
+    <div id="welcome">Loading...</div>
+
+    <div class="balance-box">
+      <p><strong>💰 Основной баланс:</strong> <span id="main-balance">--</span> ZC</p>
+      <p><strong>🎁 Бонусный баланс:</strong> <span id="bonus-balance">--</span> ZC</p>
+    </div>
+
+    <div class="btn-group">
+      <button onclick="buyPackage()">💼 Пакеты</button>
+      <button onclick="playGames()">🎮 Игры</button>
+      <button onclick="withdraw()">📤 Вывод</button>
+    </div>
   </div>
-  <script src="script.js"></script>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
