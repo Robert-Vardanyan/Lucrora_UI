@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mini App</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
-    #main {
-      display: none;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZC Bot Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+  <div class="container">
+    <h1>📊 ZC Dashboard</h1>
+    <div id="welcome">Loading...</div>
 
-  <div id="welcome">Загрузка...</div>
-  <div id="main">
-    <p id="main-balance"></p>
-    <p id="bonus-balance"></p>
+    <div class="balance-box">
+      <p><strong>💰 Основной баланс:</strong> <span id="main-balance">--</span> ZC</p>
+      <p><strong>🎁 Бонусный баланс:</strong> <span id="bonus-balance">--</span> ZC</p>
+    </div>
 
-    <button onclick="buyPackage()">🛒 Купить пакет</button><br><br>
-    <button onclick="playGames()">🎮 Играть</button><br><br>
-    <button onclick="withdraw()">💸 Вывод</button>
+    <div class="btn-group">
+      <button onclick="buyPackage()">💼 Пакеты</button>
+      <button onclick="playGames()">🎮 Игры</button>
+      <button onclick="withdraw()">📤 Вывод</button>
+    </div>
   </div>
 
-  <!-- Подключение внешнего JS -->
-  <script src="script.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
