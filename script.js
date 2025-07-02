@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalReceived = document.getElementById('total-received');
 
   const user = tg.initDataUnsafe.user;
-  welcome.textContent = `👋 Привет, ₤{user.first_name || 'Пользователь'}!`;
+  welcome.textContent = `👋 Привет, ${user.first_name || 'Пользователь'}!`;
   profileUserId.textContent = user.id || 'N/A';
   profileUsername.textContent = user.first_name || 'N/A';
   // Dummy registration date for now
@@ -178,11 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Attempt to parse JSON error message if available, otherwise use status text
         return res.json().then(err => {
           console.error("🔴 Server responded with error JSON:", err);
-          throw new Error(err.message || `Сервер вернул ошибку: ₤{res.status}`);
+          throw new Error(err.message || `Сервер вернул ошибку: ${res.status}`);
         }).catch(() => {
           // Fallback if response is not JSON or parsing fails
           console.error("🔴 Server responded with non-JSON error:", res.status, res.statusText);
-          throw new Error(`Сервер вернул ошибку: ₤{res.status} ₤{res.statusText}`);
+          throw new Error(`Сервер вернул ошибку: ${res.status} ${res.statusText}`);
         });
       }
       return res.json();
@@ -191,16 +191,16 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log("🟢 Ответ от сервера:", data);
       if (data.ok) {
         // Update balances from API response
-        currentMainBalance.textContent = `₤ ₤{(data.main_balance || 0).toFixed(2)} LCR`;
-        currentBonusBalance.textContent = `(Bonus: ₤{(data.bonus_balance || 0).toFixed(2)} ₤s)`;
-        lucrumBalance.textContent = `₤{(data.lucrum_balance || 0).toFixed(2)} ₤`;
-        mainBalance.textContent = `Основной баланс: ₤{data.main_balance}₽`; // Assuming this is also from API
-        bonusBalance.textContent = `Бонусный баланс: ₤{data.bonus_balance}₽`; // Assuming this is also from API
+        currentMainBalance.textContent = `₤ ${(data.main_balance || 0).toFixed(2)} LCR`;
+        currentBonusBalance.textContent = `(Bonus: ${(data.bonus_balance || 0).toFixed(2)} ₤s)`;
+        lucrumBalance.textContent = `${(data.lucrum_balance || 0).toFixed(2)} ₤`;
+        mainBalance.textContent = `Основной баланс: ${data.main_balance}₽`; // Assuming this is also from API
+        bonusBalance.textContent = `Бонусный баланс: ${data.bonus_balance}₽`; // Assuming this is also from API
 
         // Update profile data if available
-        totalInvested.textContent = `₤ ₤{(data.total_invested || 0).toFixed(2)}`;
-        totalWithdrawn.textContent = `₤ ₤{(data.total_withdrawn || 0).toFixed(2)}`;
-        currentWithdrawalBalance.textContent = `₤ ₤{(data.main_balance || 0).toFixed(2)} LCR`; // Use main balance for withdrawal
+        totalInvested.textContent = `₤ ${(data.total_invested || 0).toFixed(2)}`;
+        totalWithdrawn.textContent = `₤ ${(data.total_withdrawn || 0).toFixed(2)}`;
+        currentWithdrawalBalance.textContent = `₤ ${(data.main_balance || 0).toFixed(2)} LCR`; // Use main balance for withdrawal
 
         // Show the main application UI and hide loading
         loadingMessage.classList.add('hidden');
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(error => {
       console.error("🔴 Ошибка при запросе:", error);
-      showError('Ошибка соединения с сервером', `Не удалось подключиться к серверу. ₤{error.message || 'Пожалуйста, проверьте ваше интернет-соединение или попробуйте позже.'}`);
+      showError('Ошибка соединения с сервером', `Не удалось подключиться к серверу. ${error.message || 'Пожалуйста, проверьте ваше интернет-соединение или попробуйте позже.'}`);
     });
 
   // --- Navigation Event Listeners ---
@@ -330,8 +330,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const feeAmount = (amount * feePercentage) / 100;
     const netAmount = amount - feeAmount;
 
-    withdrawalFee.textContent = `₤{feePercentage}%`;
-    totalReceived.textContent = `₤₤{netAmount.toFixed(2)}`;
+    withdrawalFee.textContent = `${feePercentage}%`;
+    totalReceived.textContent = `₤${netAmount.toFixed(2)}`;
 
     // Basic check for available balance (client-side, server-side needed too)
     if (amount > currentBalance) {
