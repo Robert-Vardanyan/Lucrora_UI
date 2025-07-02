@@ -4,6 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const telegramPrompt = document.getElementById('telegram-prompt');
     const mainContentWrapper = document.getElementById('main-content-wrapper');
 
+    // Get error overlay elements
+    const customErrorOverlay = document.getElementById('custom-error-overlay');
+    const errorTitle = document.getElementById('error-title');
+    const errorMessage = document.getElementById('error-message');
+    const errorCloseBtn = document.getElementById('error-close-btn');
+
     // Get navigation items
     const navHome = document.getElementById('nav-home');
     const navInvest = document.getElementById('nav-invest');
@@ -28,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadingMessage.classList.remove('hidden');
     telegramPrompt.classList.add('hidden');
     mainContentWrapper.classList.add('hidden');
+    customErrorOverlay.classList.add('hidden'); // Ensure error overlay is hidden
     Object.values(screens).forEach(screen => screen.classList.add('hidden'));
 
     /**
@@ -64,6 +71,40 @@ document.addEventListener('DOMContentLoaded', () => {
             activeNavItem.classList.remove('text-gray-500');
         }
     }
+
+    /**
+     * Shows a custom error message overlay.
+     * @param {string} title The title of the error.
+     * @param {string} message The detailed error message.
+     */
+    function showError(title, message) {
+        loadingMessage.classList.add('hidden');
+        telegramPrompt.classList.add('hidden');
+        mainContentWrapper.classList.add('hidden'); // Hide main app if error occurs
+        customErrorOverlay.classList.remove('hidden');
+        errorTitle.textContent = title;
+        errorMessage.textContent = message;
+    }
+
+    /**
+     * Hides the custom error message overlay.
+     */
+    function hideError() {
+        customErrorOverlay.classList.add('hidden');
+        // After hiding error, decide what to show.
+        // For now, if Telegram WebApp is valid, try to show the main app.
+        // Otherwise, show the Telegram prompt.
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+            mainContentWrapper.classList.remove('hidden');
+            showScreen('home-screen'); // Re-show home screen
+        } else {
+            telegramPrompt.classList.remove('hidden');
+        }
+    }
+
+    // Attach event listener to the error close button
+    errorCloseBtn.addEventListener('click', hideError);
+
 
     // Check if Telegram WebApp is available
     if (!window.Telegram || !window.Telegram.WebApp) {
@@ -134,7 +175,15 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .then(res => {
         if (!res.ok) {
-            return res.json().then(err => { throw new Error(err.message || res.statusText); }).catch(() => { throw new Error(res.statusText); });
+            // Attempt to parse JSON error message if available, otherwise use status text
+            return res.json().then(err => {
+                console.error("🔴 Server responded with error JSON:", err);
+                throw new Error(err.message || `Сервер вернул ошибку: ${res.status}`);
+            }).catch(() => {
+                // Fallback if response is not JSON or parsing fails
+                console.error("🔴 Server responded with non-JSON error:", res.status, res.statusText);
+                throw new Error(`Сервер вернул ошибку: ${res.status} ${res.statusText}`);
+            });
         }
         return res.json();
     })
@@ -175,17 +224,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
         } else {
-            loadingMessage.classList.add('hidden');
-            telegramPrompt.classList.remove('hidden');
-            // Optionally, display a more specific error message in the prompt
-            telegramPrompt.querySelector('h2').textContent = `❌ Ошибка данных: ${data.message || 'Неизвестная ошибка'}`;
+            // Handle API response not OK
+            showError('Ошибка данных от сервера', data.message || 'Сервер вернул ошибку. Пожалуйста, попробуйте еще раз.');
         }
     })
     .catch(error => {
         console.error("🔴 Ошибка при запросе:", error);
-        loadingMessage.classList.add('hidden');
-        telegramPrompt.classList.remove('hidden');
-        telegramPrompt.querySelector('h2').textContent = '❌ Ошибка соединения с сервером';
+        showError('Ошибка соединения с сервером', `Не удалось подключиться к серверу. ${error.message || 'Пожалуйста, проверьте ваше интернет-соединение или попробуйте позже.'}`);
     });
 
     // --- Navigation Event Listeners ---
@@ -241,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tg.shareText(referralLinkInput.value, 'Поделитесь моей реферальной ссылкой!');
         } else {
             // Fallback for non-Telegram environment or older WebApp versions
-            console.log("Sharing not supported directly outside Telegram WebApp or older version.");
+            console.log("Sharing not supported directly outside Telegram WebApp or older version. Copied to clipboard instead.");
             // You might want to implement a custom modal here instead of alert
             // For now, a simple log and copy confirmation
             const originalText = shareReferralLinkBtn.textContent;
@@ -257,12 +302,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Withdrawal Screen Logic ---
     withdrawalAmountInput.addEventListener('input', () => {
         const amount = parseFloat(withdrawalAmountInput.value);
-        const currentBalance = parseFloat(currentWithdrawalBalance.textContent.replace('$', '').replace(' USDT', ''));
+        const currentBalanceText = currentWithdrawalBalance.textContent.replace('$', '').replace(' USDT', '');
+        const currentBalance = parseFloat(currentBalanceText);
         const minWithdrawal = 10; // Example minimum withdrawal
 
         if (isNaN(amount) || amount <= 0) {
             withdrawalFee.textContent = '0%';
             totalReceived.textContent = '$0.00';
+            withdrawalAmountInput.classList.remove('border-red-500');
+            withdrawalAmountInput.classList.add('border-gray-300');
             return;
         }
 
@@ -274,6 +322,8 @@ document.addEventListener('DOMContentLoaded', () => {
              // Handle amount less than minimum
              withdrawalFee.textContent = 'Недостаточно';
              totalReceived.textContent = '$0.00';
+             withdrawalAmountInput.classList.add('border-red-500');
+             withdrawalAmountInput.classList.remove('border-gray-300');
              return;
         }
 
