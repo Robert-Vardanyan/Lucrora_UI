@@ -1,42 +1,176 @@
+/* General Body and App Container Styles */
 body {
-  font-family: Arial, sans-serif;
-  background: #f1f3f7;
-  margin: 0;
-  padding: 0;
-  color: #222;
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5; /* Light background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    overflow: hidden; /* Prevent body scroll, screen-container handles scroll */
 }
 
-.container {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 20px;
-  text-align: center;
+.app-container {
+    background-color: #ffffff; /* White background for app container */
+    border-radius: 1.5rem; /* Rounded corners */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    max-width: 400px; /* Max width for desktop view */
+    width: 100%;
+    height: 100vh; /* Full height for mobile-like experience */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Hide overflow for internal scrolling */
+    position: relative; /* For fixed header/footer positioning */
 }
 
-h1 {
-  margin-bottom: 20px;
+/* Header Gradient for Titles */
+.header-gradient {
+    background: linear-gradient(45deg, #28a745, #218838); /* Green gradient */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.balance-box {
-  background: white;
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
+/* Telegram Button Style */
+.btn-telegram {
+    background-color: #0088cc; /* Telegram color */
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+.btn-telegram:hover {
+    background-color: #007bb5;
 }
 
-.btn-group button {
-  margin: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  background-color: #0088cc;
-  color: white;
-  cursor: pointer;
-  transition: 0.2s ease;
+/* Input Field Styles */
+input[type="number"],
+input[type="text"],
+select {
+    border: 1px solid #d1d5db; /* Light border */
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 0.5rem;
+    transition: border-color 0.3s ease;
+}
+input[type="number"]:focus,
+input[type="text"]:focus,
+select:focus {
+    outline: none;
+    border-color: #28a745; /* Green border on focus */
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2); /* Soft shadow on focus */
 }
 
-.btn-group button:hover {
-  background-color: #0075b4;
+/* Top Header Styles */
+.top-header {
+    height: 80px; /* Fixed height for header */
+}
+
+/* Screen Container for Scrollable Content */
+.screen-container {
+    padding-top: 80px; /* Space for fixed header */
+    padding-bottom: 80px; /* Space for fixed navigation */
+    overflow-y: auto; /* Enable vertical scrolling for content */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    flex-grow: 1; /* Allow container to take available space */
+}
+
+/* Base Screen Styles */
+.screen {
+    padding: 1rem;
+}
+
+/* Bottom Navigation Bar Styles */
+.bottom-nav-bar {
+    height: 70px; /* Fixed height for navigation */
+    border-top-left-radius: 1.5rem;
+    border-top-right-radius: 1.5rem;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05); /* Soft shadow upwards */
+}
+
+.nav-item {
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-item.active {
+    color: #28a745; /* Active color */
+}
+
+.nav-item:hover {
+    background-color: #f0f2f5; /* Light hover background */
+}
+
+/* Card Styles */
+.summary-card,
+.investment-item,
+.package-card,
+.game-card,
+.referral-link-card,
+.referral-level-card,
+.transaction-item,
+.profile-card,
+.deposit-method-card,
+.withdrawal-card {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+}
+
+/* Action Button Styles */
+.action-button,
+.buy-package-button,
+.play-game-button,
+.details-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.action-button:hover,
+.buy-package-button:hover,
+.play-game-button:hover {
+    transform: translateY(-2px); /* Slight lift on hover */
+}
+
+/* Specific button colors (Tailwind classes handle most, but for clarity) */
+.bg-green-500 { background-color: #28a745; }
+.hover:bg-green-600:hover { background-color: #218838; }
+.bg-blue-500 { background-color: #007bff; }
+.hover:bg-blue-600:hover { background-color: #0069d9; }
+.bg-red-500 { background-color: #dc3545; }
+.hover:bg-red-600:hover { background-color: #c82333; }
+.bg-purple-500 { background-color: #6f42c1; }
+.hover:bg-purple-600:hover { background-color: #5a2eab; }
+.bg-gray-200 { background-color: #e2e8f0; }
+.hover:bg-gray-300:hover { background-color: #cbd5e1; }
+
+/* Warning/Info Box */
+.warning-box {
+    border-left-width: 4px;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+.bg-yellow-100 { background-color: #fff3cd; }
+.border-yellow-500 { border-color: #ffc107; }
+.text-yellow-700 { color: #856404; }
+.bg-red-100 { background-color: #f8d7da; }
+.border-red-500 { border-color: #dc3545; }
+.text-red-700 { color: #721c24; }
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .app-container {
+        border-radius: 0; /* No rounded corners on full mobile screen */
+        max-width: 100%;
+        height: 100vh;
+    }
+    .top-header, .bottom-nav-bar {
+        border-radius: 0;
+    }
 }
