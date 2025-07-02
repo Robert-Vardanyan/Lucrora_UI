@@ -1,401 +1,485 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucrum Mini App</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Link to the external CSS file -->
-    <link rel="stylesheet" href="style.css">
-    <!-- Telegram WebApp Script -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lucrum Mini App</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Link to the external CSS file -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Telegram WebApp Script -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
+
 <body>
-    <div id="app" class="app-container">
-        <!-- Loading message (initially visible) -->
-        <div id="loading-message" class="loading-screen">
-            <div class="spinner"></div>
-            <p class="text-gray-600 mt-4">Загрузка...</p>
-        </div>
-
-        <!-- Telegram Prompt (initially hidden, shown if not in Telegram) -->
-        <div id="telegram-prompt" class="hidden telegram-prompt-screen">
-            <svg class="w-24 h-24 text-blue-500 mb-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.732 8.784l-1.077 5.064c-.16.75-.583 1.01-.988 1.01-.368 0-.68-.188-.93-.396l-2.09-1.554-1.008 1.008c-.144.144-.264.264-.48.264-.192 0-.336-.084-.48-.228l-.72-.72c-.144-.144-.228-.288-.228-.48 0-.192.084-.336.228-.48l1.008-1.008-1.554-2.09c-.208-.25-.396-.562-.396-.93 0-.405.26-.828 1.01-.988l5.064-1.077c.8-.17 1.488.42 1.312 1.22z"/>
-            </svg>
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">❌ Пожалуйста, откройте приложение внутри Telegram</h2>
-            <p class="text-gray-600 mb-6">
-                Это мини-приложение работает только внутри Telegram.
-                Пожалуйста, откройте его через нашего бота.
-            </p>
-            <a href="https://t.me/lucrora_bot" target="_blank" class="btn-telegram">
-                Запустить бота
-            </a>
-        </div>
-
-        <!-- Main Content Wrapper (hidden until Telegram validation passes) -->
-        <div id="main-content-wrapper" class="hidden flex flex-col h-full w-full">
-            <!-- Top Header -->
-            <header class="top-header fixed top-0 left-0 w-full bg-white shadow-sm p-4 flex justify-between items-center z-10 rounded-b-xl">
-                <div class="text-lg font-bold text-gray-800">CryptoInvest Bot</div>
-                <div class="text-center">
-                    <p id="current-main-balance" class="text-xl font-bold text-green-600">$ 0.00 USDT</p>
-                    <p id="current-bonus-balance" class="text-sm text-gray-500">(Bonus: 0.00 Gems)</p>
-                </div>
-                <div id="user-profile-icon" class="profile-icon-wrapper cursor-pointer">
-                    <svg class="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                </div>
-            </header>
-
-            <!-- Screen Container -->
-            <div class="screen-container flex-grow overflow-y-auto p-4 pt-20 pb-20">
-                <!-- Home / Dashboard Screen -->
-                <div id="home-screen" class="screen active">
-                    <h2 id="welcome" class="text-2xl font-bold text-gray-800 mb-4"></h2>
-                    <div class="summary-card bg-white rounded-xl shadow-md p-4 mb-4">
-                        <p class="text-lg font-semibold text-gray-700 mb-2">Ваши активные пакеты: <span id="active-packages-count">0</span></p>
-                        <p class="text-lg font-semibold text-gray-700">Доход за сегодня: <span id="daily-income">+ $0.00</span></p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <button id="buy-package-btn" class="action-button bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                            Купить Пакет
-                        </button>
-                        <button id="deposit-btn" class="action-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                            Пополнить Баланс
-                        </button>
-                        <button id="withdraw-btn" class="action-button bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                            Вывести Средства
-                        </button>
-                    </div>
-
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Мои Инвестиции</h3>
-                    <div id="my-investments-list" class="space-y-4">
-                        <!-- Investment items will be loaded here -->
-                        <div class="investment-item bg-white rounded-xl shadow-md p-4">
-                            <p class="text-lg font-semibold text-gray-800">Gold Plan</p>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-                                <div class="bg-green-600 h-2.5 rounded-full" style="width: 70%;"></div>
-                            </div>
-                            <p class="text-sm text-gray-600">70% завершено</p>
-                            <p class="text-sm text-gray-600">Заработано: $15.00 / $25.00</p>
-                            <p class="text-sm text-gray-600">Осталось дней: 10</p>
-                            <button class="details-button mt-3 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-1 px-3 rounded-md">Детали</button>
-                        </div>
-                    </div>
-
-                    <h3 class="text-xl font-bold text-gray-800 mt-6 mb-4">Последние Новости/Акции</h3>
-                    <div class="space-y-4">
-                        <div class="news-card bg-white rounded-xl shadow-md p-4">
-                            <p class="font-semibold text-gray-800">Новый план 'Diamond' уже доступен!</p>
-                            <p class="text-sm text-gray-600">Увеличьте доход.</p>
-                        </div>
-                        <div class="news-card bg-white rounded-xl shadow-md p-4">
-                            <p class="font-semibold text-gray-800">Акция! +5% к реферальным бонусам на этой неделе!</p>
-                        </div>
-                    </div>
-
-                    <h3 class="text-xl font-bold text-gray-800 mt-6 mb-4">Наш Прогресс</h3>
-                    <div class="progress-card bg-white rounded-xl shadow-md p-4 mb-4">
-                        <p class="text-lg font-semibold text-gray-700">Общий объем инвестиций в боте: <span id="total-investments">$12,345</span></p>
-                        <p class="text-lg font-semibold text-gray-700">Общий заработок пользователей: <span id="total-earnings">$2,100</span></p>
-                        <button class="action-button mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                            Отчет о Прозрачности
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Invest / Shop Screen -->
-                <div id="invest-screen" class="screen hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Выберите Ваш Инвестиционный План</h2>
-                    <div id="investment-packages-list" class="space-y-4">
-                        <!-- Package cards will be loaded here -->
-                        <div class="package-card bg-white rounded-xl shadow-md p-4">
-                            <div class="flex items-center mb-2">
-                                <svg class="w-8 h-8 text-yellow-500 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 7h2v6h-2zm0 8h2v2h-2z"/></svg>
-                                <h3 class="text-xl font-bold text-gray-800">Бронзовый Пакет</h3>
-                            </div>
-                            <p class="text-gray-600">Стоимость: <span class="font-semibold">$10 USDT</span></p>
-                            <p class="text-gray-600">Ежедневный ROI: <span class="font-semibold text-green-600">+0.5% ($0.05/день)</span></p>
-                            <p class="text-gray-600">Срок действия: <span class="font-semibold">30 дней</span></p>
-                            <p class="text-gray-600 mb-4">Общий доход: <span class="font-semibold">~$15.00</span></p>
-                            <button class="buy-package-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                                Купить Пакет за $10
-                            </button>
-                        </div>
-                        <div class="package-card bg-white rounded-xl shadow-md p-4">
-                            <div class="flex items-center mb-2">
-                                <svg class="w-8 h-8 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 7h2v6h-2zm0 8h2v2h-2z"/></svg>
-                                <h3 class="text-xl font-bold text-gray-800">Серебряный Пакет</h3>
-                            </div>
-                            <p class="text-gray-600">Стоимость: <span class="font-semibold">$50 USDT</span></p>
-                            <p class="text-gray-600">Ежедневный ROI: <span class="font-semibold text-green-600">+0.7% ($0.35/день)</span></p>
-                            <p class="text-gray-600">Срок действия: <span class="font-semibold">60 дней</span></p>
-                            <p class="text-gray-600 mb-4">Общий доход: <span class="font-semibold">~$71.00</span></p>
-                            <button class="buy-package-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                                Купить Пакет за $50
-                            </button>
-                        </div>
-                        <div class="package-card bg-white rounded-xl shadow-md p-4">
-                            <div class="flex items-center mb-2">
-                                <svg class="w-8 h-8 text-yellow-600 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 7h2v6h-2zm0 8h2v2h-2z"/></svg>
-                                <h3 class="text-xl font-bold text-gray-800">Золотой Пакет</h3>
-                            </div>
-                            <p class="text-gray-600">Стоимость: <span class="font-semibold">$100 USDT</span></p>
-                            <p class="text-gray-600">Ежедневный ROI: <span class="font-semibold text-green-600">+1.0% ($1.00/день)</span></p>
-                            <p class="text-gray-600">Срок действия: <span class="font-semibold">90 дней</span></p>
-                            <p class="text-gray-600 mb-4">Общий доход: <span class="font-semibold">~$190.00</span></p>
-                            <button class="buy-package-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                                Купить Пакет за $100
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Games Screen -->
-                <div id="games-screen" class="screen hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Игры на Бонусный Баланс</h2>
-                    <div class="bonus-balance-display bg-gray-100 rounded-xl p-4 mb-4 text-center">
-                        <p class="text-lg font-semibold text-gray-700">Ваш бонусный баланс: <span id="games-bonus-balance" class="text-green-600">0.00 Gems</span></p>
-                    </div>
-                    <div class="warning-box bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-md" role="alert">
-                        <p class="font-bold">Внимание:</p>
-                        <p>Выигрыши от игр могут быть выведены с комиссией 10%.</p>
-                    </div>
-
-                    <div id="games-list" class="space-y-4">
-                        <div class="game-card bg-white rounded-xl shadow-md p-4">
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Колесо Удачи</h3>
-                            <p class="text-gray-600 mb-3">Крутите колесо и выигрывайте до X Gems!</p>
-                            <p class="text-gray-600 mb-4">Стоимость участия: <span class="font-semibold">1 Gem</span></p>
-                            <button class="play-game-button w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                                Играть
-                            </button>
-                        </div>
-                        <div class="game-card bg-white rounded-xl shadow-md p-4">
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Больше/Меньше</h3>
-                            <p class="text-gray-600 mb-3">Угадайте, будет ли следующее число больше или меньше.</p>
-                            <p class="text-gray-600 mb-4">Стоимость участия: <span class="font-semibold">0.5 Gem</span></p>
-                            <button class="play-game-button w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                                Играть
-                            </button>
-                        </div>
-                    </div>
-                    <button class="action-button mt-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                        Как это работает? / Проверка честности
-                    </button>
-                </div>
-
-                <!-- Referrals Screen -->
-                <div id="referrals-screen" class="screen hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Ваша Реферальная Система</h2>
-                    <div class="referral-link-card bg-white rounded-xl shadow-md p-4 mb-4">
-                        <p class="text-lg font-semibold text-gray-700 mb-2">Ваша Реферальная Ссылка:</p>
-                        <div class="flex items-center bg-gray-100 rounded-md p-3 mb-3">
-                            <input type="text" id="referral-link-input" class="flex-grow bg-transparent border-none outline-none text-gray-700" value="https://t.me/YourBot?start=ref_[YOUR_ID]" readonly>
-                            <button id="copy-referral-link-btn" class="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md transition duration-300">
-                                Копировать
-                            </button>
-                        </div>
-                        <button id="share-referral-link-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                            Поделиться
-                        </button>
-                    </div>
-
-                    <div class="summary-card bg-white rounded-xl shadow-md p-4 mb-4">
-                        <p class="text-lg font-semibold text-gray-700">Заработано от рефералов: <span id="referral-earnings">$0.00</span></p>
-                        <p class="text-lg font-semibold text-gray-700">Активных рефералов: <span id="active-referrals-count">0</span></p>
-                    </div>
-
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Ваша Реферальная Сеть</h3>
-                    <div id="referral-network-list" class="space-y-4">
-                        <div class="referral-level-card bg-white rounded-xl shadow-md p-4">
-                            <p class="text-lg font-semibold text-gray-800 mb-2">Уровень 1 (Ваши прямые рефералы)</p>
-                            <ul class="list-disc list-inside text-gray-600 mb-2">
-                                <li>User123 - $5.20</li>
-                                <li>User456 - $3.10</li>
-                            </ul>
-                            <p class="text-sm text-gray-700">Заработано с уровня: <span class="font-semibold">$8.30</span> (0.5% от их дохода)</p>
-                        </div>
-                        <div class="referral-level-card bg-white rounded-xl shadow-md p-4">
-                            <p class="text-lg font-semibold text-gray-800 mb-2">Уровень 2 (Рефералы Ваших рефералов)</p>
-                            <ul class="list-disc list-inside text-gray-600 mb-2">
-                                <li>User789 - $2.50</li>
-                            </ul>
-                            <p class="text-sm text-gray-700">Заработано с уровня: <span class="font-semibold">$5.00</span> (0.4% от их дохода)</p>
-                        </div>
-                    </div>
-                    <button class="action-button mt-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                        Маркетинговые Материалы
-                    </button>
-                </div>
-
-                <!-- History / Transactions Screen -->
-                <div id="history-screen" class="screen hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">История Операций</h2>
-                    <div class="filter-options mb-4">
-                        <select id="transaction-filter" class="w-full p-2 border border-gray-300 rounded-md">
-                            <option value="all">Все</option>
-                            <option value="deposits">Пополнения</option>
-                            <option value="withdrawals">Выводы</option>
-                            <option value="earnings">Начисления</option>
-                            <option value="games">Игры</option>
-                        </select>
-                    </div>
-                    <div id="transactions-list" class="space-y-4">
-                        <!-- Transaction items will be loaded here -->
-                        <div class="transaction-item bg-white rounded-xl shadow-md p-4">
-                            <p class="text-sm text-gray-500">01.07.2025, 14:30</p>
-                            <p class="text-lg font-semibold text-gray-800">Пополнение</p>
-                            <p class="text-gray-600">Описание: Пополнение на 100 USDT</p>
-                            <p class="text-green-600 font-bold">+ $100.00</p>
-                            <p class="text-sm text-gray-500">ID: #ABCDEF123</p>
-                        </div>
-                        <div class="transaction-item bg-white rounded-xl shadow-md p-4">
-                            <p class="text-sm text-gray-500">01.07.2025, 15:00</p>
-                            <p class="text-lg font-semibold text-gray-800">Начисление дохода</p>
-                            <p class="text-gray-600">Описание: Доход по Bronze Plan</p>
-                            <p class="text-green-600 font-bold">+ $1.50</p>
-                        </div>
-                        <div class="transaction-item bg-white rounded-xl shadow-md p-4">
-                            <p class="text-sm text-gray-500">01.07.2025, 16:00</p>
-                            <p class="text-lg font-semibold text-gray-800">Вывод средств</p>
-                            <p class="text-gray-600">Описание: Вывод 50 USDT</p>
-                            <p class="text-red-600 font-bold">- $50.00</p>
-                            <p class="text-sm text-yellow-600">Статус: В обработке</p>
-                            <p class="text-sm text-gray-500">ID: #GHIJKL456</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- My Profile Screen (Special Screen) -->
-                <div id="profile-screen" class="screen hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Мой Профиль</h2>
-                    <div class="profile-card bg-white rounded-xl shadow-md p-4 text-center mb-4">
-                        <svg class="w-20 h-20 text-gray-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                        </svg>
-                        <p class="text-lg font-semibold text-gray-800">Ваш ID: <span id="profile-user-id">N/A</span></p>
-                        <p class="text-lg font-semibold text-gray-800">Имя Пользователя: <span id="profile-username">N/A</span></p>
-                        <p class="text-gray-600">Дата Регистрации: <span id="profile-registration-date">N/A</span></p>
-                        <p class="text-gray-600 mt-4">Общий Инвестированный Капитал: <span id="total-invested">$0.00</span></p>
-                        <p class="text-gray-600">Общий Выведенный Капитал: <span id="total-withdrawn">$0.00</span></p>
-                    </div>
-                    <div class="space-y-4">
-                        <button class="action-button w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                            Связаться с Поддержкой
-                        </button>
-                        <button class="action-button w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                            Условия Обслуживания
-                        </button>
-                        <button class="action-button w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                            Политика Конфиденциальности
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Deposit Screen (Special Screen) -->
-                <div id="deposit-screen" class="screen hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Выберите Метод Пополнения</h2>
-                    <div class="deposit-method-card bg-white rounded-xl shadow-md p-4 mb-4">
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">USDT (TRC20)</h3>
-                        <div class="qr-code-placeholder bg-gray-200 w-32 h-32 mx-auto rounded-md flex items-center justify-center text-gray-500 mb-4">
-                            [QR-код]
-                        </div>
-                        <p class="text-gray-600 mb-2">Адрес кошелька:</p>
-                        <div class="flex items-center bg-gray-100 rounded-md p-3 mb-3">
-                            <input type="text" id="usdt-address-input" class="flex-grow bg-transparent border-none outline-none text-gray-700" value="TXc...xyz" readonly>
-                            <button id="copy-usdt-address-btn" class="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md transition duration-300">
-                                Копировать
-                            </button>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-2">Минимальная сумма: <span class="font-semibold">10 USDT</span></p>
-                        <div class="warning-box bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
-                            <p class="font-bold">Важно:</p>
-                            <p>Отправляйте только USDT (TRC20). Отправка других активов приведет к потере средств.</p>
-                        </div>
-                        <label for="txid-input" class="block text-gray-700 text-sm font-medium mb-2">Введите TXID (хэш транзакции):</label>
-                        <input type="text" id="txid-input" placeholder="Введите TXID" class="w-full p-2 border border-gray-300 rounded-md mb-4">
-                        <button class="action-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                            Я оплатил
-                        </button>
-                    </div>
-                    <button class="action-button mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                        Как это работает? / Инструкция по пополнению
-                    </button>
-                </div>
-
-                <!-- Withdrawal Screen (Special Screen) -->
-                <div id="withdrawal-screen" class="screen hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Вывод Средств</h2>
-                    <div class="withdrawal-card bg-white rounded-xl shadow-md p-4 mb-4">
-                        <p class="text-lg font-semibold text-gray-700 mb-4">Ваш текущий баланс: <span id="current-withdrawal-balance" class="text-green-600">$0.00 USDT</span></p>
-
-                        <label for="withdrawal-amount-input" class="block text-gray-700 text-sm font-medium mb-2">Сумма вывода:</label>
-                        <input type="number" id="withdrawal-amount-input" placeholder="0.00" class="w-full p-2 border border-gray-300 rounded-md mb-4">
-
-                        <label for="withdrawal-address-input" class="block text-gray-700 text-sm font-medium mb-2">Адрес Вашего USDT (TRC20) кошелька:</label>
-                        <input type="text" id="withdrawal-address-input" placeholder="Введите адрес кошелька" class="w-full p-2 border border-gray-300 rounded-md mb-4">
-
-                        <p class="text-gray-600 mb-2">Комиссия за вывод: <span id="withdrawal-fee" class="font-semibold">0%</span></p>
-                        <p class="text-lg font-bold text-gray-800 mb-4">Итого к получению: <span id="total-received" class="text-green-600">$0.00</span></p>
-
-                        <div class="warning-box bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
-                            <p class="font-bold">Важно:</p>
-                            <p>Убедитесь, что адрес кошелька верный. Средства отправляются только на USDT (TRC20). Выводы обрабатываются в течение 24 часов.</p>
-                        </div>
-                        <button class="action-button w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                            Отправить Заявку на Вывод
-                        </button>
-                        <p class="text-sm text-gray-500 mt-2">Минимальная сумма вывода: <span class="font-semibold">$10</span></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bottom Navigation Bar -->
-            <nav class="bottom-nav-bar fixed bottom-0 left-0 w-full bg-white shadow-lg p-3 flex justify-around items-center z-10 rounded-t-xl">
-                <div id="nav-home" class="nav-item flex flex-col items-center cursor-pointer text-green-600">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                    <span class="text-xs">Главная</span>
-                </div>
-                <div id="nav-invest" class="nav-item flex flex-col items-center cursor-pointer text-gray-500 hover:text-green-600">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm0-10h10V5H12v1zm0 12v-2h10v2H12z"/></svg>
-                    <span class="text-xs">Инвестиции</span>
-                </div>
-                <div id="nav-games" class="nav-item flex flex-col items-center cursor-pointer text-gray-500 hover:text-green-600">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 6H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-2 12H6V8h12v10zm-9-7.5V13h3v-2.5H9z"/></svg>
-                    <span class="text-xs">Игры</span>
-                </div>
-                <div id="nav-referrals" class="nav-item flex flex-col items-center cursor-pointer text-gray-500 hover:text-green-600">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-4 0c1.66 0 2.99-1.34 2.99-3S13.66 5 12 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-4 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm8 4H0v2c0 2.21 3.58 4 8 4s8-1.79 8-4v-2zm-4 0H4v2c0 .66.89 1.2 2 1.5s2.44.5 4 .5c1.56 0 2.89-.17 4-.5s2-.84 2-1.5v-2h-4z"/></svg>
-                    <span class="text-xs">Рефералы</span>
-                </div>
-                <div id="nav-history" class="nav-item flex flex-col items-center cursor-pointer text-gray-500 hover:text-green-600">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.42C9.4 19.35 11.1 20 13 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8h-1z"/></svg>
-                    <span class="text-xs">История</span>
-                </div>
-            </nav>
-        </div>
+  <div id="app" class="app-container">
+    <!-- Loading message (initially visible) -->
+    <div id="loading-message" class="loading-screen">
+      <div class="spinner"></div>
+      <p class="text-gray-600 mt-4">Загрузка...</p>
     </div>
 
-    <!-- Custom Error Overlay (initially hidden) -->
-    <div id="custom-error-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="error-card bg-white rounded-2xl shadow-xl p-8 text-center max-w-sm w-11/12">
-            <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-            </svg>
-            <h3 id="error-title" class="text-xl font-bold text-gray-800 mb-2">Ошибка!</h3>
-            <p id="error-message" class="text-gray-600 mb-6">Произошла неизвестная ошибка.</p>
-            <button id="error-close-btn" class="action-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-                Понятно
+    <!-- Telegram Prompt (initially hidden, shown if not in Telegram) -->
+    <div id="telegram-prompt" class="hidden telegram-prompt-screen">
+      <svg class="w-24 h-24 text-blue-500 mb-6" fill="currentColor" viewBox="0 0 24 24">
+        <path
+          d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.732 8.784l-1.077 5.064c-.16.75-.583 1.01-.988 1.01-.368 0-.68-.188-.93-.396l-2.09-1.554-1.008 1.008c-.144.144-.264.264-.48.264-.192 0-.336-.084-.48-.228l-.72-.72c-.144-.144-.228-.288-.228-.48 0-.192.084-.336.228-.48l1.008-1.008-1.554-2.09c-.208-.25-.396-.562-.396-.93 0-.405.26-.828 1.01-.988l5.064-1.077c.8-.17 1.488.42 1.312 1.22z" />
+      </svg>
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">❌ Пожалуйста, откройте приложение внутри Telegram</h2>
+      <p class="text-gray-600 mb-6">
+        Это мини-приложение работает только внутри Telegram.
+        Пожалуйста, откройте его через нашего бота.
+      </p>
+      <a href="https://t.me/lucrora_bot" target="_blank" class="btn-telegram">
+        Запустить бота
+      </a>
+    </div>
+
+    <!-- Main Content Wrapper (hidden until Telegram validation passes) -->
+    <div id="main-content-wrapper" class="hidden flex flex-col h-full w-full">
+      <!-- Top Header -->
+      <header
+        class="top-header fixed top-0 left-0 w-full bg-white shadow-sm p-4 flex justify-between items-center z-10 rounded-b-xl">
+        <div class="text-lg font-bold text-gray-800">Lucrora</div>
+        <div class="text-center">
+          <p id="current-main-balance" class="text-xl font-bold text-green-600">₤ 0.00 LCR</p>
+          <p id="current-bonus-balance" class="text-sm text-gray-500">(Bonus: 0.00 ₤)</p>
+        </div>
+        <div id="user-profile-icon" class="profile-icon-wrapper cursor-pointer">
+          <svg class="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>
+        </div>
+      </header>
+
+      <!-- Screen Container -->
+      <div class="screen-container flex-grow overflow-y-auto p-4 pt-20 pb-20">
+        <!-- Home / Dashboard Screen -->
+        <div id="home-screen" class="screen active">
+          <h2 id="welcome" class="text-2xl font-bold text-gray-800 mb-4"></h2>
+          <div class="summary-card bg-white rounded-xl shadow-md p-4 mb-4">
+            <p class="text-lg font-semibold text-gray-700 mb-2">Ваши активные пакеты: <span
+                id="active-packages-count">0</span></p>
+            <p class="text-lg font-semibold text-gray-700">Доход за сегодня: <span id="daily-income">+ ₤0.00</span></p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <button id="buy-package-btn"
+              class="action-button bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+              Купить Пакет
             </button>
-        </div>
-    </div>
+            <button id="deposit-btn"
+              class="action-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+              Пополнить Баланс
+            </button>
+            <button id="withdraw-btn"
+              class="action-button bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+              Вывести Средства
+            </button>
+          </div>
 
-    <!-- Link to the external JavaScript file -->
-    <script src="script.js"></script>
+          <h3 class="text-xl font-bold text-gray-800 mb-4">Мои Инвестиции</h3>
+          <div id="my-investments-list" class="space-y-4">
+            <!-- Investment items will be loaded here -->
+            <div class="investment-item bg-white rounded-xl shadow-md p-4">
+              <p class="text-lg font-semibold text-gray-800">Gold Plan</p>
+              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                <div class="bg-green-600 h-2.5 rounded-full" style="width: 70%;"></div>
+              </div>
+              <p class="text-sm text-gray-600">70% завершено</p>
+              <p class="text-sm text-gray-600">Заработано: ₤15.00 / ₤25.00</p>
+              <p class="text-sm text-gray-600">Осталось дней: 10</p>
+              <button
+                class="details-button mt-3 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-1 px-3 rounded-md">Детали</button>
+            </div>
+          </div>
+
+          <h3 class="text-xl font-bold text-gray-800 mt-6 mb-4">Последние Новости/Акции</h3>
+          <div class="space-y-4">
+            <div class="news-card bg-white rounded-xl shadow-md p-4">
+              <p class="font-semibold text-gray-800">Новый план 'Diamond' уже доступен!</p>
+              <p class="text-sm text-gray-600">Увеличьте доход.</p>
+            </div>
+            <div class="news-card bg-white rounded-xl shadow-md p-4">
+              <p class="font-semibold text-gray-800">Акция! +5% к реферальным бонусам на этой неделе!</p>
+            </div>
+          </div>
+
+          <h3 class="text-xl font-bold text-gray-800 mt-6 mb-4">Наш Прогресс</h3>
+          <div class="progress-card bg-white rounded-xl shadow-md p-4 mb-4">
+            <p class="text-lg font-semibold text-gray-700">Общий объем инвестиций в боте: <span
+                id="total-investments">₤12,345</span></p>
+            <p class="text-lg font-semibold text-gray-700">Общий заработок пользователей: <span
+                id="total-earnings">₤2,100</span></p>
+            <button
+              class="action-button mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+              Отчет о Прозрачности
+            </button>
+          </div>
+        </div>
+
+        <!-- Invest / Shop Screen -->
+        <div id="invest-screen" class="screen hidden">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Выберите Ваш Инвестиционный План</h2>
+          <div id="investment-packages-list" class="space-y-4">
+            <!-- Package cards will be loaded here -->
+            <div class="package-card bg-white rounded-xl shadow-md p-4">
+              <div class="flex items-center mb-2">
+                <svg class="w-8 h-8 text-yellow-500 mr-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 7h2v6h-2zm0 8h2v2h-2z" />
+                </svg>
+                <h3 class="text-xl font-bold text-gray-800">Бронзовый Пакет</h3>
+              </div>
+              <p class="text-gray-600">Стоимость: <span class="font-semibold">₤10 LCR</span></p>
+              <p class="text-gray-600">Ежедневный ROI: <span class="font-semibold text-green-600">+0.5%
+                  (₤0.05/день)</span></p>
+              <p class="text-gray-600">Срок действия: <span class="font-semibold">30 дней</span></p>
+              <p class="text-gray-600 mb-4">Общий доход: <span class="font-semibold">~₤15.00</span></p>
+              <button
+                class="buy-package-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+                Купить Пакет за ₤10
+              </button>
+            </div>
+            <div class="package-card bg-white rounded-xl shadow-md p-4">
+              <div class="flex items-center mb-2">
+                <svg class="w-8 h-8 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 7h2v6h-2zm0 8h2v2h-2z" />
+                </svg>
+                <h3 class="text-xl font-bold text-gray-800">Серебряный Пакет</h3>
+              </div>
+              <p class="text-gray-600">Стоимость: <span class="font-semibold">₤50 LCR</span></p>
+              <p class="text-gray-600">Ежедневный ROI: <span class="font-semibold text-green-600">+0.7%
+                  (₤0.35/день)</span></p>
+              <p class="text-gray-600">Срок действия: <span class="font-semibold">60 дней</span></p>
+              <p class="text-gray-600 mb-4">Общий доход: <span class="font-semibold">~₤71.00</span></p>
+              <button
+                class="buy-package-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+                Купить Пакет за ₤50
+              </button>
+            </div>
+            <div class="package-card bg-white rounded-xl shadow-md p-4">
+              <div class="flex items-center mb-2">
+                <svg class="w-8 h-8 text-yellow-600 mr-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 7h2v6h-2zm0 8h2v2h-2z" />
+                </svg>
+                <h3 class="text-xl font-bold text-gray-800">Золотой Пакет</h3>
+              </div>
+              <p class="text-gray-600">Стоимость: <span class="font-semibold">₤100 LCR</span></p>
+              <p class="text-gray-600">Ежедневный ROI: <span class="font-semibold text-green-600">+1.0%
+                  (₤1.00/день)</span></p>
+              <p class="text-gray-600">Срок действия: <span class="font-semibold">90 дней</span></p>
+              <p class="text-gray-600 mb-4">Общий доход: <span class="font-semibold">~₤190.00</span></p>
+              <button
+                class="buy-package-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+                Купить Пакет за ₤100
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Games Screen -->
+        <div id="games-screen" class="screen hidden">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Игры на Бонусный Баланс</h2>
+          <div class="bonus-balance-display bg-gray-100 rounded-xl p-4 mb-4 text-center">
+            <p class="text-lg font-semibold text-gray-700">Ваш бонусный баланс: <span id="games-bonus-balance"
+                class="text-green-600">0.00 ₤s</span></p>
+          </div>
+          <div class="warning-box bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-md"
+            role="alert">
+            <p class="font-bold">Внимание:</p>
+            <p>Выигрыши от игр могут быть выведены с комиссией 10%.</p>
+          </div>
+
+          <div id="games-list" class="space-y-4">
+            <div class="game-card bg-white rounded-xl shadow-md p-4">
+              <h3 class="text-xl font-bold text-gray-800 mb-2">Колесо Удачи</h3>
+              <p class="text-gray-600 mb-3">Крутите колесо и выигрывайте до X ₤s!</p>
+              <p class="text-gray-600 mb-4">Стоимость участия: <span class="font-semibold">1 ₤</span></p>
+              <button
+                class="play-game-button w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+                Играть
+              </button>
+            </div>
+            <div class="game-card bg-white rounded-xl shadow-md p-4">
+              <h3 class="text-xl font-bold text-gray-800 mb-2">Больше/Меньше</h3>
+              <p class="text-gray-600 mb-3">Угадайте, будет ли следующее число больше или меньше.</p>
+              <p class="text-gray-600 mb-4">Стоимость участия: <span class="font-semibold">0.5 ₤</span></p>
+              <button
+                class="play-game-button w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+                Играть
+              </button>
+            </div>
+          </div>
+          <button
+            class="action-button mt-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+            Как это работает? / Проверка честности
+          </button>
+        </div>
+
+        <!-- Referrals Screen -->
+        <div id="referrals-screen" class="screen hidden">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Ваша Реферальная Система</h2>
+          <div class="referral-link-card bg-white rounded-xl shadow-md p-4 mb-4">
+            <p class="text-lg font-semibold text-gray-700 mb-2">Ваша Реферальная Ссылка:</p>
+            <div class="flex items-center bg-gray-100 rounded-md p-3 mb-3">
+              <input type="text" id="referral-link-input"
+                class="flex-grow bg-transparent border-none outline-none text-gray-700"
+                value="https://t.me/YourBot?start=ref_[YOUR_ID]" readonly>
+              <button id="copy-referral-link-btn"
+                class="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md transition duration-300">
+                Копировать
+              </button>
+            </div>
+            <button id="share-referral-link-btn"
+              class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+              Поделиться
+            </button>
+          </div>
+
+          <div class="summary-card bg-white rounded-xl shadow-md p-4 mb-4">
+            <p class="text-lg font-semibold text-gray-700">Заработано от рефералов: <span
+                id="referral-earnings">₤0.00</span></p>
+            <p class="text-lg font-semibold text-gray-700">Активных рефералов: <span
+                id="active-referrals-count">0</span></p>
+          </div>
+
+          <h3 class="text-xl font-bold text-gray-800 mb-4">Ваша Реферальная Сеть</h3>
+          <div id="referral-network-list" class="space-y-4">
+            <div class="referral-level-card bg-white rounded-xl shadow-md p-4">
+              <p class="text-lg font-semibold text-gray-800 mb-2">Уровень 1 (Ваши прямые рефералы)</p>
+              <ul class="list-disc list-inside text-gray-600 mb-2">
+                <li>User123 - ₤5.20</li>
+                <li>User456 - ₤3.10</li>
+              </ul>
+              <p class="text-sm text-gray-700">Заработано с уровня: <span class="font-semibold">₤8.30</span> (0.5% от их
+                дохода)</p>
+            </div>
+            <div class="referral-level-card bg-white rounded-xl shadow-md p-4">
+              <p class="text-lg font-semibold text-gray-800 mb-2">Уровень 2 (Рефералы Ваших рефералов)</p>
+              <ul class="list-disc list-inside text-gray-600 mb-2">
+                <li>User789 - ₤2.50</li>
+              </ul>
+              <p class="text-sm text-gray-700">Заработано с уровня: <span class="font-semibold">₤5.00</span> (0.4% от их
+                дохода)</p>
+            </div>
+          </div>
+          <button
+            class="action-button mt-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+            Маркетинговые Материалы
+          </button>
+        </div>
+
+        <!-- History / Transactions Screen -->
+        <div id="history-screen" class="screen hidden">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">История Операций</h2>
+          <div class="filter-options mb-4">
+            <select id="transaction-filter" class="w-full p-2 border border-gray-300 rounded-md">
+              <option value="all">Все</option>
+              <option value="deposits">Пополнения</option>
+              <option value="withdrawals">Выводы</option>
+              <option value="earnings">Начисления</option>
+              <option value="games">Игры</option>
+            </select>
+          </div>
+          <div id="transactions-list" class="space-y-4">
+            <!-- Transaction items will be loaded here -->
+            <div class="transaction-item bg-white rounded-xl shadow-md p-4">
+              <p class="text-sm text-gray-500">01.07.2025, 14:30</p>
+              <p class="text-lg font-semibold text-gray-800">Пополнение</p>
+              <p class="text-gray-600">Описание: Пополнение на 100 LCR</p>
+              <p class="text-green-600 font-bold">+ ₤100.00</p>
+              <p class="text-sm text-gray-500">ID: #ABCDEF123</p>
+            </div>
+            <div class="transaction-item bg-white rounded-xl shadow-md p-4">
+              <p class="text-sm text-gray-500">01.07.2025, 15:00</p>
+              <p class="text-lg font-semibold text-gray-800">Начисление дохода</p>
+              <p class="text-gray-600">Описание: Доход по Bronze Plan</p>
+              <p class="text-green-600 font-bold">+ ₤1.50</p>
+            </div>
+            <div class="transaction-item bg-white rounded-xl shadow-md p-4">
+              <p class="text-sm text-gray-500">01.07.2025, 16:00</p>
+              <p class="text-lg font-semibold text-gray-800">Вывод средств</p>
+              <p class="text-gray-600">Описание: Вывод 50 LCR</p>
+              <p class="text-red-600 font-bold">- ₤50.00</p>
+              <p class="text-sm text-yellow-600">Статус: В обработке</p>
+              <p class="text-sm text-gray-500">ID: #GHIJKL456</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Profile Screen (Special Screen) -->
+        <div id="profile-screen" class="screen hidden">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Мой Профиль</h2>
+          <div class="profile-card bg-white rounded-xl shadow-md p-4 text-center mb-4">
+            <svg class="w-20 h-20 text-gray-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            <p class="text-lg font-semibold text-gray-800">Ваш ID: <span id="profile-user-id">N/A</span></p>
+            <p class="text-lg font-semibold text-gray-800">Имя Пользователя: <span id="profile-username">N/A</span></p>
+            <p class="text-gray-600">Дата Регистрации: <span id="profile-registration-date">N/A</span></p>
+            <p class="text-gray-600 mt-4">Общий Инвестированный Капитал: <span id="total-invested">₤0.00</span></p>
+            <p class="text-gray-600">Общий Выведенный Капитал: <span id="total-withdrawn">₤0.00</span></p>
+          </div>
+          <div class="space-y-4">
+            <button
+              class="action-button w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+              Связаться с Поддержкой
+            </button>
+            <button
+              class="action-button w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+              Условия Обслуживания
+            </button>
+            <button
+              class="action-button w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+              Политика Конфиденциальности
+            </button>
+          </div>
+        </div>
+
+        <!-- Deposit Screen (Special Screen) -->
+        <div id="deposit-screen" class="screen hidden">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Выберите Метод Пополнения</h2>
+          <div class="deposit-method-card bg-white rounded-xl shadow-md p-4 mb-4">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">LCR (TRC20)</h3>
+            <div
+              class="qr-code-placeholder bg-gray-200 w-32 h-32 mx-auto rounded-md flex items-center justify-center text-gray-500 mb-4">
+              [QR-код]
+            </div>
+            <p class="text-gray-600 mb-2">Адрес кошелька:</p>
+            <div class="flex items-center bg-gray-100 rounded-md p-3 mb-3">
+              <input type="text" id="LCR-address-input"
+                class="flex-grow bg-transparent border-none outline-none text-gray-700" value="TXc...xyz" readonly>
+              <button id="copy-LCR-address-btn"
+                class="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md transition duration-300">
+                Копировать
+              </button>
+            </div>
+            <p class="text-sm text-gray-600 mb-2">Минимальная сумма: <span class="font-semibold">10 LCR</span></p>
+            <div class="warning-box bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
+              <p class="font-bold">Важно:</p>
+              <p>Отправляйте только LCR (TRC20). Отправка других активов приведет к потере средств.</p>
+            </div>
+            <label for="txid-input" class="block text-gray-700 text-sm font-medium mb-2">Введите TXID (хэш
+              транзакции):</label>
+            <input type="text" id="txid-input" placeholder="Введите TXID"
+              class="w-full p-2 border border-gray-300 rounded-md mb-4">
+            <button
+              class="action-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+              Я оплатил
+            </button>
+          </div>
+          <button
+            class="action-button mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+            Как это работает? / Инструкция по пополнению
+          </button>
+        </div>
+
+        <!-- Withdrawal Screen (Special Screen) -->
+        <div id="withdrawal-screen" class="screen hidden">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Вывод Средств</h2>
+          <div class="withdrawal-card bg-white rounded-xl shadow-md p-4 mb-4">
+            <p class="text-lg font-semibold text-gray-700 mb-4">Ваш текущий баланс: <span
+                id="current-withdrawal-balance" class="text-green-600">₤0.00 LCR</span></p>
+
+            <label for="withdrawal-amount-input" class="block text-gray-700 text-sm font-medium mb-2">Сумма
+              вывода:</label>
+            <input type="number" id="withdrawal-amount-input" placeholder="0.00"
+              class="w-full p-2 border border-gray-300 rounded-md mb-4">
+
+            <label for="withdrawal-address-input" class="block text-gray-700 text-sm font-medium mb-2">Адрес Вашего LCR
+              (TRC20) кошелька:</label>
+            <input type="text" id="withdrawal-address-input" placeholder="Введите адрес кошелька"
+              class="w-full p-2 border border-gray-300 rounded-md mb-4">
+
+            <p class="text-gray-600 mb-2">Комиссия за вывод: <span id="withdrawal-fee" class="font-semibold">0%</span>
+            </p>
+            <p class="text-lg font-bold text-gray-800 mb-4">Итого к получению: <span id="total-received"
+                class="text-green-600">₤0.00</span></p>
+
+            <div class="warning-box bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
+              <p class="font-bold">Важно:</p>
+              <p>Убедитесь, что адрес кошелька верный. Средства отправляются только на LCR (TRC20). Выводы
+                обрабатываются в течение 24 часов.</p>
+            </div>
+            <button
+              class="action-button w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+              Отправить Заявку на Вывод
+            </button>
+            <p class="text-sm text-gray-500 mt-2">Минимальная сумма вывода: <span class="font-semibold">₤10</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Navigation Bar -->
+      <nav
+        class="bottom-nav-bar fixed bottom-0 left-0 w-full bg-white shadow-lg p-3 flex justify-around items-center z-10 rounded-t-xl">
+        <div id="nav-home" class="nav-item flex flex-col items-center cursor-pointer text-green-600">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+          </svg>
+          <span class="text-xs">Главная</span>
+        </div>
+        <div id="nav-invest"
+          class="nav-item flex flex-col items-center cursor-pointer text-gray-500 hover:text-green-600">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm0-10h10V5H12v1zm0 12v-2h10v2H12z" />
+          </svg>
+          <span class="text-xs">Инвестиции</span>
+        </div>
+        <div id="nav-games"
+          class="nav-item flex flex-col items-center cursor-pointer text-gray-500 hover:text-green-600">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M20 6H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-2 12H6V8h12v10zm-9-7.5V13h3v-2.5H9z" />
+          </svg>
+          <span class="text-xs">Игры</span>
+        </div>
+        <div id="nav-referrals"
+          class="nav-item flex flex-col items-center cursor-pointer text-gray-500 hover:text-green-600">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-4 0c1.66 0 2.99-1.34 2.99-3S13.66 5 12 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-4 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm8 4H0v2c0 2.21 3.58 4 8 4s8-1.79 8-4v-2zm-4 0H4v2c0 .66.89 1.2 2 1.5s2.44.5 4 .5c1.56 0 2.89-.17 4-.5s2-.84 2-1.5v-2h-4z" />
+          </svg>
+          <span class="text-xs">Рефералы</span>
+        </div>
+        <div id="nav-history"
+          class="nav-item flex flex-col items-center cursor-pointer text-gray-500 hover:text-green-600">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.42C9.4 19.35 11.1 20 13 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8h-1z" />
+          </svg>
+          <span class="text-xs">История</span>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Custom Error Overlay (initially hidden) -->
+  <div id="custom-error-overlay"
+    class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="error-card bg-white rounded-2xl shadow-xl p-8 text-center max-w-sm w-11/12">
+      <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+      </svg>
+      <h3 id="error-title" class="text-xl font-bold text-gray-800 mb-2">Ошибка!</h3>
+      <p id="error-message" class="text-gray-600 mb-6">Произошла неизвестная ошибка.</p>
+      <button id="error-close-btn"
+        class="action-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+        Понятно
+      </button>
+    </div>
+  </div>
+
+  <!-- Link to the external JavaScript file -->
+  <script src="script.js"></script>
 </body>
+
 </html>
