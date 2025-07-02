@@ -30,13 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'withdrawal-screen': document.getElementById('withdrawal-screen')
     };
 
-    // Initially hide all screens and show loading message
-    loadingMessage.classList.remove('hidden');
-    telegramPrompt.classList.add('hidden');
-    mainContentWrapper.classList.add('hidden');
-    customErrorOverlay.classList.add('hidden'); // Ensure error overlay is hidden
-    Object.values(screens).forEach(screen => screen.classList.add('hidden'));
-
     /**
      * Shows a specific screen and hides all others.
      * Also updates the active state of navigation items.
@@ -87,91 +80,92 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Hides the custom error message overlay.
+     * Hides the custom error message overlay and re-initializes the app.
      */
     function hideError() {
         customErrorOverlay.classList.add('hidden');
-        // After hiding error, if Telegram WebApp is valid, try to re-initialize/show the main app.
-        // This is crucial for the "works after clicking OK" scenario.
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-            // If the error was transient (e.g., timing issue), we can now show the main app
-            // and potentially re-fetch data if needed (though current logic only fetches once).
-            mainContentWrapper.classList.remove('hidden');
-            showScreen('home-screen'); // Re-show home screen
-        } else {
-            // If Telegram WebApp is not valid, show the Telegram prompt
-            telegramPrompt.classList.remove('hidden');
-        }
+        initializeWebApp(); // Re-attempt to initialize the WebApp
     }
 
     // Attach event listener to the error close button
     errorCloseBtn.addEventListener('click', hideError);
 
+    /**
+     * Initializes the Telegram WebApp and fetches initial user data.
+     */
+    function initializeWebApp() {
+        // Reset UI state to loading
+        loadingMessage.classList.remove('hidden');
+        telegramPrompt.classList.add('hidden');
+        mainContentWrapper.classList.add('hidden');
+        customErrorOverlay.classList.add('hidden');
+        Object.values(screens).forEach(screen => screen.classList.add('hidden'));
 
-    // Check if Telegram WebApp is available
-    if (!window.Telegram || !window.Telegram.WebApp) {
-        loadingMessage.classList.add('hidden');
-        telegramPrompt.classList.remove('hidden');
-        return;
-    }
 
-    const tg = window.Telegram.WebApp;
+        // Check if Telegram WebApp is available
+        if (!window.Telegram || !window.Telegram.WebApp) {
+            loadingMessage.classList.add('hidden');
+            telegramPrompt.classList.remove('hidden');
+            return;
+        }
 
-    // Check for Telegram Mini App specific init data
-    if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-        loadingMessage.classList.add('hidden');
-        telegramPrompt.classList.remove('hidden');
-        return;
-    }
+        const tg = window.Telegram.WebApp;
 
-    // Get UI elements for the main app
-    const welcome = document.getElementById('welcome');
-    const currentMainBalance = document.getElementById('current-main-balance');
-    const currentBonusBalance = document.getElementById('current-bonus-balance');
-    const lucrumBalance = document.getElementById('lucrum-balance');
-    const mainBalance = document.getElementById('main-balance');
-    const bonusBalance = document.getElementById('bonus-balance'); // From Home screen
+        // Ensure WebApp is ready and initData is available
+        // tg.ready() is a good signal, but initData should be available immediately on app open.
+        // If initDataUnsafe or initDataUnsafe.user is missing, it's not a valid Telegram Mini App context.
+        if (!tg.initDataUnsafe || !tg.initDataUnsafe.user || !tg.initData) {
+            loadingMessage.classList.add('hidden');
+            telegramPrompt.classList.remove('hidden');
+            return;
+        }
 
-    // Home screen elements
-    const buyPackageBtn = document.getElementById('buy-package-btn');
-    const depositBtn = document.getElementById('deposit-btn');
-    const withdrawBtn = document.getElementById('withdraw-btn');
+        // Get UI elements for the main app (these are only fetched once per initialization)
+        const welcome = document.getElementById('welcome');
+        const currentMainBalance = document.getElementById('current-main-balance');
+        const currentBonusBalance = document.getElementById('current-bonus-balance');
+        const lucrumBalance = document.getElementById('lucrum-balance');
+        const mainBalance = document.getElementById('main-balance');
+        const bonusBalance = document.getElementById('bonus-balance');
 
-    // Conversion elements (from previous version, still in Home screen)
-    const amountInput = document.getElementById('amount-input');
-    const convertButton = document.getElementById('convert-button');
-    const convertedAmountSpan = document.getElementById('converted-amount');
-    const convertedCurrencySpan = document.getElementById('converted-currency');
+        // Home screen elements
+        const buyPackageBtn = document.getElementById('buy-package-btn');
+        const depositBtn = document.getElementById('deposit-btn');
+        const withdrawBtn = document.getElementById('withdraw-btn');
 
-    // Profile screen elements
-    const profileUserId = document.getElementById('profile-user-id');
-    const profileUsername = document.getElementById('profile-username');
-    const profileRegistrationDate = document.getElementById('profile-registration-date');
-    const totalInvested = document.getElementById('total-invested');
-    const totalWithdrawn = document.getElementById('total-withdrawn');
+        // Conversion elements (from previous version, still in Home screen)
+        const amountInput = document.getElementById('amount-input');
+        const convertButton = document.getElementById('convert-button');
+        const convertedAmountSpan = document.getElementById('converted-amount');
+        const convertedCurrencySpan = document.getElementById('converted-currency');
 
-    // Deposit screen elements
-    const usdtAddressInput = document.getElementById('usdt-address-input');
-    const copyUsdtAddressBtn = document.getElementById('copy-usdt-address-btn');
+        // Profile screen elements
+        const profileUserId = document.getElementById('profile-user-id');
+        const profileUsername = document.getElementById('profile-username');
+        const profileRegistrationDate = document.getElementById('profile-registration-date');
+        const totalInvested = document.getElementById('total-invested');
+        const totalWithdrawn = document.getElementById('total-withdrawn');
 
-    // Withdrawal screen elements
-    const currentWithdrawalBalance = document.getElementById('current-withdrawal-balance');
-    const withdrawalAmountInput = document.getElementById('withdrawal-amount-input');
-    const withdrawalFee = document.getElementById('withdrawal-fee');
-    const totalReceived = document.getElementById('total-received');
+        // Deposit screen elements
+        const usdtAddressInput = document.getElementById('usdt-address-input');
+        const copyUsdtAddressBtn = document.getElementById('copy-usdt-address-btn');
 
-    const user = tg.initDataUnsafe.user;
-    welcome.textContent = `👋 Привет, ${user.first_name || 'Пользователь'}!`;
-    profileUserId.textContent = user.id || 'N/A';
-    profileUsername.textContent = user.first_name || 'N/A';
-    // Dummy registration date for now
-    profileRegistrationDate.textContent = '01.01.2025';
+        // Withdrawal screen elements
+        const currentWithdrawalBalance = document.getElementById('current-withdrawal-balance');
+        const withdrawalAmountInput = document.getElementById('withdrawal-amount-input');
+        const withdrawalFee = document.getElementById('withdrawal-fee');
+        const totalReceived = document.getElementById('total-received');
 
-    console.log("🟡 initData:", tg.initData);
+        const user = tg.initDataUnsafe.user;
+        welcome.textContent = `👋 Привет, ${user.first_name || 'Пользователь'}!`;
+        profileUserId.textContent = user.id || 'N/A';
+        profileUsername.textContent = user.first_name || 'N/A';
+        // Dummy registration date for now
+        profileRegistrationDate.textContent = '01.01.2025';
 
-    // --- Delayed Fetch for Initial Data ---
-    // This timeout helps ensure Telegram.WebApp.initData is fully ready.
-    setTimeout(() => {
+        console.log("🟡 initData:", tg.initData);
+
+        // Fetch user data from your API
         fetch('https://lucrora.osc-fr1.scalingo.io/api/init', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -196,13 +190,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentMainBalance.textContent = `$ ${(data.main_balance || 0).toFixed(2)} USDT`;
                 currentBonusBalance.textContent = `(Bonus: ${(data.bonus_balance || 0).toFixed(2)} Gems)`;
                 lucrumBalance.textContent = `${(data.lucrum_balance || 0).toFixed(2)} ₤`;
-                mainBalance.textContent = `Основной баланс: ${data.main_balance}₽`; // Assuming this is also from API
-                bonusBalance.textContent = `Бонусный баланс: ${data.bonus_balance}₽`; // Assuming this is also from API
+                mainBalance.textContent = `Основной баланс: ${data.main_balance}₽`;
+                bonusBalance.textContent = `Бонусный баланс: ${data.bonus_balance}₽`;
 
                 // Update profile data if available
                 totalInvested.textContent = `$ ${(data.total_invested || 0).toFixed(2)}`;
                 totalWithdrawn.textContent = `$ ${(data.total_withdrawn || 0).toFixed(2)}`;
-                currentWithdrawalBalance.textContent = `$ ${(data.main_balance || 0).toFixed(2)} USDT`; // Use main balance for withdrawal
+                currentWithdrawalBalance.textContent = `$ ${(data.main_balance || 0).toFixed(2)} USDT`;
 
                 // Show the main application UI and hide loading
                 loadingMessage.classList.add('hidden');
@@ -210,20 +204,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 showScreen('home-screen'); // Default to home screen
 
                 // Attach conversion logic listener (from previous version)
-                convertButton.addEventListener('click', () => {
-                    const amount = parseFloat(amountInput.value);
-                    if (isNaN(amount) || amount <= 0) {
-                        convertedAmountSpan.textContent = '0.00';
-                        convertedCurrencySpan.textContent = '0.00';
-                        return;
-                    }
-                    // Placeholder conversion logic: 1 Lucrum = 0.5 USD
-                    const lucrumValue = amount;
-                    const usdValue = amount * 0.5;
+                // Ensure this is attached only once to avoid multiple listeners
+                if (!convertButton.dataset.listenerAttached) {
+                    convertButton.addEventListener('click', () => {
+                        const amount = parseFloat(amountInput.value);
+                        if (isNaN(amount) || amount <= 0) {
+                            convertedAmountSpan.textContent = '0.00';
+                            convertedCurrencySpan.textContent = '0.00';
+                            return;
+                        }
+                        // Placeholder conversion logic: 1 Lucrum = 0.5 USD
+                        const lucrumValue = amount;
+                        const usdValue = amount * 0.5;
 
-                    convertedAmountSpan.textContent = lucrumValue.toFixed(2);
-                    convertedCurrencySpan.textContent = usdValue.toFixed(2);
-                });
+                        convertedAmountSpan.textContent = lucrumValue.toFixed(2);
+                        convertedCurrencySpan.textContent = usdValue.toFixed(2);
+                    });
+                    convertButton.dataset.listenerAttached = 'true';
+                }
 
             } else {
                 // Handle API response not OK
@@ -234,116 +232,115 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("🔴 Ошибка при запросе:", error);
             showError('Ошибка соединения с сервером', `Не удалось подключиться к серверу. ${error.message || 'Пожалуйста, проверьте ваше интернет-соединение или попробуйте позже.'}`);
         });
-    }, 150); // Small delay to ensure Telegram WebApp initData is fully ready
 
-    // --- Navigation Event Listeners ---
-    navHome.addEventListener('click', () => showScreen('home-screen'));
-    navInvest.addEventListener('click', () => showScreen('invest-screen'));
-    navGames.addEventListener('click', () => {
-        document.getElementById('games-bonus-balance').textContent = currentBonusBalance.textContent.replace('(Bonus: ', '').replace(')', ''); // Update games bonus balance
-        showScreen('games-screen');
-    });
-    navReferrals.addEventListener('click', () => {
-        // Placeholder for referral earnings/active referrals from API
-        document.getElementById('referral-earnings').textContent = '$15.75';
-        document.getElementById('active-referrals-count').textContent = '12';
-        showScreen('referrals-screen');
-    });
-    navHistory.addEventListener('click', () => showScreen('history-screen'));
-    userProfileIcon.addEventListener('click', () => showScreen('profile-screen'));
+        // --- Navigation Event Listeners ---
+        // Attach these only once to avoid multiple listeners if initializeWebApp is called multiple times
+        if (!navHome.dataset.listenerAttached) {
+            navHome.addEventListener('click', () => showScreen('home-screen'));
+            navInvest.addEventListener('click', () => showScreen('invest-screen'));
+            navGames.addEventListener('click', () => {
+                document.getElementById('games-bonus-balance').textContent = currentBonusBalance.textContent.replace('(Bonus: ', '').replace(')', ''); // Update games bonus balance
+                showScreen('games-screen');
+            });
+            navReferrals.addEventListener('click', () => {
+                // Placeholder for referral earnings/active referrals from API
+                document.getElementById('referral-earnings').textContent = '$15.75';
+                document.getElementById('active-referrals-count').textContent = '12';
+                showScreen('referrals-screen');
+            });
+            navHistory.addEventListener('click', () => showScreen('history-screen'));
+            userProfileIcon.addEventListener('click', () => showScreen('profile-screen'));
 
-    // --- Home Screen Action Buttons ---
-    buyPackageBtn.addEventListener('click', () => showScreen('invest-screen'));
-    depositBtn.addEventListener('click', () => showScreen('deposit-screen'));
-    withdrawBtn.addEventListener('click', () => showScreen('withdrawal-screen'));
+            // Home Screen Action Buttons
+            buyPackageBtn.addEventListener('click', () => showScreen('invest-screen'));
+            depositBtn.addEventListener('click', () => showScreen('deposit-screen'));
+            withdrawBtn.addEventListener('click', () => showScreen('withdrawal-screen'));
 
-    // --- Referral Screen Actions ---
-    copyUsdtAddressBtn.addEventListener('click', () => {
-        usdtAddressInput.select();
-        document.execCommand('copy');
-        // Show a temporary message
-        const originalText = copyUsdtAddressBtn.textContent;
-        copyUsdtAddressBtn.textContent = 'Скопировано!';
-        setTimeout(() => {
-            copyUsdtAddressBtn.textContent = originalText;
-        }, 2000);
-    });
+            // Referral Screen Actions
+            copyUsdtAddressBtn.addEventListener('click', () => {
+                usdtAddressInput.select();
+                document.execCommand('copy');
+                const originalText = copyUsdtAddressBtn.textContent;
+                copyUsdtAddressBtn.textContent = 'Скопировано!';
+                setTimeout(() => {
+                    copyUsdtAddressBtn.textContent = originalText;
+                }, 2000);
+            });
 
-    const referralLinkInput = document.getElementById('referral-link-input');
-    const copyReferralLinkBtn = document.getElementById('copy-referral-link-btn');
-    const shareReferralLinkBtn = document.getElementById('share-referral-link-btn');
+            const referralLinkInput = document.getElementById('referral-link-input');
+            const copyReferralLinkBtn = document.getElementById('copy-referral-link-btn');
+            const shareReferralLinkBtn = document.getElementById('share-referral-link-btn');
 
-    copyReferralLinkBtn.addEventListener('click', () => {
-        referralLinkInput.select();
-        document.execCommand('copy');
-        const originalText = copyReferralLinkBtn.textContent;
-        copyReferralLinkBtn.textContent = 'Скопировано!';
-        setTimeout(() => {
-            copyReferralLinkBtn.textContent = originalText;
-        }, 2000);
-    });
+            copyReferralLinkBtn.addEventListener('click', () => {
+                referralLinkInput.select();
+                document.execCommand('copy');
+                const originalText = copyReferralLinkBtn.textContent;
+                copyReferralLinkBtn.textContent = 'Скопировано!';
+                setTimeout(() => {
+                    copyReferralLinkBtn.textContent = originalText;
+                }, 2000);
+            });
 
-    shareReferralLinkBtn.addEventListener('click', () => {
-        // Telegram WebApp share functionality (if available)
-        if (tg && tg.shareText) {
-            tg.shareText(referralLinkInput.value, 'Поделитесь моей реферальной ссылкой!');
-        } else {
-            // Fallback for non-Telegram environment or older WebApp versions
-            console.log("Sharing not supported directly outside Telegram WebApp or older version. Copied to clipboard instead.");
-            // You might want to implement a custom modal here instead of alert
-            // For now, a simple log and copy confirmation
-            const originalText = shareReferralLinkBtn.textContent;
-            shareReferralLinkBtn.textContent = 'Скопировано!';
-            setTimeout(() => {
-                shareReferralLinkBtn.textContent = originalText;
-            }, 2000);
-            referralLinkInput.select();
-            document.execCommand('copy');
+            shareReferralLinkBtn.addEventListener('click', () => {
+                if (tg && tg.shareText) {
+                    tg.shareText(referralLinkInput.value, 'Поделитесь моей реферальной ссылкой!');
+                } else {
+                    console.log("Sharing not supported directly outside Telegram WebApp or older version. Copied to clipboard instead.");
+                    const originalText = shareReferralLinkBtn.textContent;
+                    shareReferralLinkBtn.textContent = 'Скопировано!';
+                    setTimeout(() => {
+                        shareReferralLinkBtn.textContent = originalText;
+                    }, 2000);
+                    referralLinkInput.select();
+                    document.execCommand('copy');
+                }
+            });
+
+            // Withdrawal Screen Logic
+            withdrawalAmountInput.addEventListener('input', () => {
+                const amount = parseFloat(withdrawalAmountInput.value);
+                const currentBalanceText = currentWithdrawalBalance.textContent.replace('$', '').replace(' USDT', '');
+                const currentBalance = parseFloat(currentBalanceText);
+                const minWithdrawal = 10; // Example minimum withdrawal
+
+                if (isNaN(amount) || amount <= 0) {
+                    withdrawalFee.textContent = '0%';
+                    totalReceived.textContent = '$0.00';
+                    withdrawalAmountInput.classList.remove('border-red-500');
+                    withdrawalAmountInput.classList.add('border-gray-300');
+                    return;
+                }
+
+                let feePercentage = 0; // Default 0%
+                if (amount < 100 && amount >= minWithdrawal) {
+                    feePercentage = 3;
+                } else if (amount < minWithdrawal) {
+                    withdrawalFee.textContent = 'Недостаточно';
+                    totalReceived.textContent = '$0.00';
+                    withdrawalAmountInput.classList.add('border-red-500');
+                    withdrawalAmountInput.classList.remove('border-gray-300');
+                    return;
+                }
+
+                const feeAmount = (amount * feePercentage) / 100;
+                const netAmount = amount - feeAmount;
+
+                withdrawalFee.textContent = `${feePercentage}%`;
+                totalReceived.textContent = `$${netAmount.toFixed(2)}`;
+
+                if (amount > currentBalance) {
+                    withdrawalAmountInput.classList.add('border-red-500');
+                    withdrawalAmountInput.classList.remove('border-gray-300');
+                } else {
+                    withdrawalAmountInput.classList.remove('border-red-500');
+                    withdrawalAmountInput.classList.add('border-gray-300');
+                }
+            });
+            // Mark listeners as attached
+            navHome.dataset.listenerAttached = 'true';
         }
-    });
+    }
 
-    // --- Withdrawal Screen Logic ---
-    withdrawalAmountInput.addEventListener('input', () => {
-        const amount = parseFloat(withdrawalAmountInput.value);
-        const currentBalanceText = currentWithdrawalBalance.textContent.replace('$', '').replace(' USDT', '');
-        const currentBalance = parseFloat(currentBalanceText);
-        const minWithdrawal = 10; // Example minimum withdrawal
-
-        if (isNaN(amount) || amount <= 0) {
-            withdrawalFee.textContent = '0%';
-            totalReceived.textContent = '$0.00';
-            withdrawalAmountInput.classList.remove('border-red-500');
-            withdrawalAmountInput.classList.add('border-gray-300');
-            return;
-        }
-
-        let feePercentage = 0; // Default 0%
-        // Example: if amount > 100, no fee, else 3%
-        if (amount < 100 && amount >= minWithdrawal) {
-            feePercentage = 3;
-        } else if (amount < minWithdrawal) {
-             // Handle amount less than minimum
-             withdrawalFee.textContent = 'Недостаточно';
-             totalReceived.textContent = '$0.00';
-             withdrawalAmountInput.classList.add('border-red-500');
-             withdrawalAmountInput.classList.remove('border-gray-300');
-             return;
-        }
-
-        const feeAmount = (amount * feePercentage) / 100;
-        const netAmount = amount - feeAmount;
-
-        withdrawalFee.textContent = `${feePercentage}%`;
-        totalReceived.textContent = `$${netAmount.toFixed(2)}`;
-
-        // Basic check for available balance (client-side, server-side needed too)
-        if (amount > currentBalance) {
-            withdrawalAmountInput.classList.add('border-red-500');
-            withdrawalAmountInput.classList.remove('border-gray-300');
-            // You might want to show a message to the user here
-        } else {
-            withdrawalAmountInput.classList.remove('border-red-500');
-            withdrawalAmountInput.classList.add('border-gray-300');
-        }
-    });
+    // Initial call to start the WebApp initialization process
+    initializeWebApp();
 });
