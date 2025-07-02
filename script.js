@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log("🟡 initData:", tg.initData);
 
   // Fetch user data from your API
-  fetch('https://lucrora.osc-fr1.scalingo.io/api/init', {
+  fetch('https://lucrora-bot.onrender.com/api/init', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ initData: tg.initData })
