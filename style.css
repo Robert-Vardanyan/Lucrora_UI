@@ -340,16 +340,13 @@ select:focus {
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .language-selector .lang-btn.active {
   background-color: #0088cc; /* Tailwind blue-500 */
   color: white;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
 }
 
 .form-content-wrapper {
@@ -422,6 +419,7 @@ select:focus {
   max-width: 150px;
   height: auto;
   margin-bottom: 24px; /* Отступ от логотипа до заголовка */
+  align-self: center; /* Центрирует логотип по горизонтали */
 }
 
 .auth-header {
