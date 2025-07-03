@@ -2,7 +2,6 @@
 function initRegistrationScreen() {
   console.log('Registration screen initialized.');
 
-  // Utility function to get element and log error if not found
   const getElement = (id) => {
     const element = document.getElementById(id);
     if (!element) {
@@ -11,13 +10,13 @@ function initRegistrationScreen() {
     return element;
   };
 
-  // Sections
-  const initialAuthChoice = getElement('initial-auth-choice');
-  const registrationFormSection = getElement('registration-form-section');
-  const loginFormSection = getElement('login-form-section');
-  const resendEmailSection = getElement('resend-email-section');
+  // НОВЫЕ: Получаем ссылки на каждый "полноэкранный" контейнер
+  const initialAuthChoiceScreen = getElement('initial-auth-choice-screen');
+  const registrationFormScreen = getElement('registration-form-screen');
+  const loginFormScreen = getElement('login-form-screen');
+  const resendEmailScreen = getElement('resend-email-screen');
 
-  // Buttons for initial choice
+  // Кнопки и поля внутри форм остаются прежними, так как их ID не менялись
   const btnRegisterNew = getElement('btn-register-new');
   const btnAlreadyHaveAccount = getElement('btn-already-have-account');
 
@@ -25,9 +24,9 @@ function initRegistrationScreen() {
   const btnBackFromRegistration = getElement('btn-back-from-registration');
   const regEmail = getElement('reg-email');
   const regPassword = getElement('reg-password');
-  const regReferral = getElement('reg-referral'); // Optional
+  const regReferral = getElement('reg-referral');
   const agreeTerms = getElement('agree-terms');
-  const emailPromo = getElement('email-promo'); // Optional
+  const emailPromo = getElement('email-promo');
   const btnRegisterSubmit = getElement('btn-register-submit');
   const linkResendEmail = getElement('link-resend-email');
   const linkGotoLogin = getElement('link-goto-login');
@@ -48,25 +47,25 @@ function initRegistrationScreen() {
   // Language buttons
   const langButtons = document.querySelectorAll('.language-selector .lang-btn');
 
-  // Function to show a specific section and hide others
-  const showSection = (sectionToShow) => {
-    // Hide all sections first
-    [initialAuthChoice, registrationFormSection, loginFormSection, resendEmailSection].forEach(section => {
-      if (section) section.classList.add('hidden');
+  // Функция для показа конкретного "экрана" и скрытия остальных
+  const showScreen = (screenToShow) => {
+    // Скрываем ВСЕ полноэкранные контейнеры
+    [initialAuthChoiceScreen, registrationFormScreen, loginFormScreen, resendEmailScreen].forEach(screen => {
+      if (screen) screen.classList.add('hidden');
     });
-    // Show the desired section
-    if (sectionToShow) sectionToShow.classList.remove('hidden');
+    // Показываем нужный
+    if (screenToShow) screenToShow.classList.remove('hidden');
   };
 
   // --- Initial setup (called on screen init) ---
-  showSection(initialAuthChoice); // Show the initial choice screen by default
+  showScreen(initialAuthChoiceScreen); // Показываем экран начального выбора по умолчанию
 
   // --- Event Listeners for Navigation ---
 
   // Initial choice buttons
   if (btnRegisterNew) {
     btnRegisterNew.addEventListener('click', () => {
-      showSection(registrationFormSection);
+      showScreen(registrationFormScreen);
       // Reset form fields
       if (regEmail) regEmail.value = '';
       if (regPassword) regPassword.value = '';
@@ -79,7 +78,7 @@ function initRegistrationScreen() {
 
   if (btnAlreadyHaveAccount) {
     btnAlreadyHaveAccount.addEventListener('click', () => {
-      showSection(loginFormSection);
+      showScreen(loginFormScreen);
       // Reset form fields
       if (loginEmail) loginEmail.value = '';
       if (loginPassword) loginPassword.value = '';
@@ -89,15 +88,14 @@ function initRegistrationScreen() {
 
   // Back buttons
   if (btnBackFromRegistration) {
-    btnBackFromRegistration.addEventListener('click', () => showSection(initialAuthChoice));
+    btnBackFromRegistration.addEventListener('click', () => showScreen(initialAuthChoiceScreen));
   }
   if (btnBackFromLogin) {
-    btnBackFromLogin.addEventListener('click', () => showSection(initialAuthChoice));
+    btnBackFromLogin.addEventListener('click', () => showScreen(initialAuthChoiceScreen));
   }
   if (btnBackFromResend) {
     btnBackFromResend.addEventListener('click', () => {
-      // Go back to the registration form from resend email screen
-      showSection(registrationFormSection);
+      showScreen(registrationFormScreen); // Вернуться на экран регистрации
     });
   }
 
@@ -105,8 +103,8 @@ function initRegistrationScreen() {
   if (linkResendEmail) {
     linkResendEmail.addEventListener('click', (e) => {
       e.preventDefault();
-      showSection(resendEmailSection);
-      if (resendEmailInput) resendEmailInput.value = ''; // Clear input
+      showScreen(resendEmailScreen);
+      if (resendEmailInput) resendEmailInput.value = '';
       updateResendButtonState();
     });
   }
@@ -114,7 +112,7 @@ function initRegistrationScreen() {
   if (linkGotoLogin) {
     linkGotoLogin.addEventListener('click', (e) => {
       e.preventDefault();
-      showSection(loginFormSection);
+      showScreen(loginFormScreen);
       if (loginEmail) loginEmail.value = '';
       if (loginPassword) loginPassword.value = '';
       updateLoginButtonState();
@@ -124,7 +122,7 @@ function initRegistrationScreen() {
   if (linkGotoRegister) {
     linkGotoRegister.addEventListener('click', (e) => {
       e.preventDefault();
-      showSection(registrationFormSection);
+      showScreen(registrationFormScreen);
       if (regEmail) regEmail.value = '';
       if (regPassword) regPassword.value = '';
       if (agreeTerms) agreeTerms.checked = false;
@@ -133,16 +131,12 @@ function initRegistrationScreen() {
   }
 
   // --- Form Validation and Button Activation ---
-
-  const validateEmail = (email) => {
-    // Simple email validation regex
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const updateRegisterButtonState = () => {
     if (!btnRegisterSubmit || !regEmail || !regPassword || !agreeTerms) return;
     const isEmailValid = validateEmail(regEmail.value);
-    const isPasswordFilled = regPassword.value.length >= 6; // Example: password min length
+    const isPasswordFilled = regPassword.value.length >= 6;
     const isTermsAgreed = agreeTerms.checked;
     btnRegisterSubmit.disabled = !(isEmailValid && isPasswordFilled && isTermsAgreed);
   };
@@ -150,7 +144,7 @@ function initRegistrationScreen() {
   const updateLoginButtonState = () => {
     if (!btnLoginSubmit || !loginEmail || !loginPassword) return;
     const isEmailValid = validateEmail(loginEmail.value);
-    const isPasswordFilled = loginPassword.value.length >= 6; // Example: password min length
+    const isPasswordFilled = loginPassword.value.length >= 6;
     btnLoginSubmit.disabled = !(isEmailValid && isPasswordFilled);
   };
 
@@ -163,7 +157,7 @@ function initRegistrationScreen() {
   if (regEmail) regEmail.addEventListener('input', updateRegisterButtonState);
   if (regPassword) regPassword.addEventListener('input', updateRegisterButtonState);
   if (agreeTerms) agreeTerms.addEventListener('change', updateRegisterButtonState);
-  if (regReferral) regReferral.addEventListener('input', updateRegisterButtonState); // Add listener for optional field too
+  if (regReferral) regReferral.addEventListener('input', updateRegisterButtonState);
 
   if (loginEmail) loginEmail.addEventListener('input', updateLoginButtonState);
   if (loginPassword) loginPassword.addEventListener('input', updateLoginButtonState);
@@ -171,7 +165,6 @@ function initRegistrationScreen() {
   if (resendEmailInput) resendEmailInput.addEventListener('input', updateResendButtonState);
 
   // --- Submission Handlers (Simulated) ---
-
   if (btnRegisterSubmit) {
     btnRegisterSubmit.addEventListener('click', async () => {
       console.log('Attempting to register user:', regEmail.value);
@@ -180,30 +173,27 @@ function initRegistrationScreen() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Telegram-Init-Data': window.Telegram.WebApp.initData // Send initData
+            'X-Telegram-Init-Data': window.Telegram.WebApp.initData
           },
           body: JSON.stringify({
             email: regEmail.value,
             password: regPassword.value,
-            referral_code: regReferral ? regReferral.value : '', // Get referral code
+            referral_code: regReferral ? regReferral.value : '',
             telegram_user_id: window.Telegram.WebApp.initDataUnsafe?.user?.id
           })
         });
-
         const data = await response.json();
-
         if (response.ok && data.ok) {
           console.log('Registration successful:', data);
           if (window.appData) {
             window.appData.isRegistered = true;
             window.appData.balances.main = data.main_balance || 0;
             window.appData.balances.bonus = data.bonus_balance || 0;
-            // Update header balances directly
             if (window.currentMainBalance) window.currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
             if (window.currentBonusBalance) window.currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
           }
           if (window.onAuthSuccess) {
-            window.onAuthSuccess(); // Call global handler from main.js to switch to main app
+            window.onAuthSuccess();
           }
         } else {
           console.error('Registration failed:', data.message || 'Unknown error');
@@ -236,16 +226,13 @@ function initRegistrationScreen() {
             telegram_user_id: window.Telegram.WebApp.initDataUnsafe?.user?.id
           })
         });
-
         const data = await response.json();
-
         if (response.ok && data.ok) {
           console.log('Login successful:', data);
           if (window.appData) {
             window.appData.isRegistered = true;
             window.appData.balances.main = data.main_balance || 0;
             window.appData.balances.bonus = data.bonus_balance || 0;
-            // Update header balances directly
             if (window.currentMainBalance) window.currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
             if (window.currentBonusBalance) window.currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
           }
@@ -282,7 +269,7 @@ function initRegistrationScreen() {
         const data = await response.json();
         if (response.ok && data.ok) {
           alert('Письмо подтверждения отправлено на ваш email!');
-          showSection(registrationFormSection); // Go back to registration form
+          showScreen(registrationFormScreen); // Вернуться на экран регистрации
         } else {
           console.error('Resend email failed:', data.message || 'Unknown error');
           if (window.showError) {
@@ -299,17 +286,13 @@ function initRegistrationScreen() {
   }
 
   // --- Language Switcher ---
-  if (langButtons.length > 0) { // Check if any language buttons exist
+  if (langButtons.length > 0) {
     langButtons.forEach(button => {
       button.addEventListener('click', () => {
         const selectedLang = button.dataset.lang;
         langButtons.forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
         console.log(`Language set to: ${selectedLang}`);
-        // Implement language change logic here
-        // For a simple example, you could store it in localStorage:
-        // localStorage.setItem('appLang', selectedLang);
-        // For a full app, you'd use an i18n library to update texts.
       });
     });
   }

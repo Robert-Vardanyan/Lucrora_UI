@@ -277,14 +277,15 @@ select:focus {
   left: 0;
   width: 100%;
   height: 100%;
-  overflow-y: auto; /* Enable scrolling for forms if content overflows */
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Center content vertically */
-  align-items: center; /* Center content horizontally */
-  background-color: white; /* Default background, will be overridden by .registration-full-screen */
-  z-index: 20; /* Ensure it's above other elements but below error overlay */
-  box-sizing: border-box; /* Include padding in element's total width and height */
+  overflow-y: auto; /* Позволяет прокручивать, если контент формы длиннее экрана */
+  display: flex; /* Важно, чтобы auth-full-screen могли использовать flex-grow */
+  flex-direction: column; /* Элементы будут располагаться сверху вниз */
+  justify-content: center; /* Центрирует содержимое по вертикали */
+  align-items: center; /* Центрирует содержимое по горизонтали */
+  background-color: white; /* Дефолтный фон */
+  z-index: 20;
+  padding: 0; /* Убираем паддинги, чтобы избежать белых полей */
+  box-sizing: border-box;
 }
 
 /* Styling for the overall registration screen container */
@@ -341,29 +342,35 @@ select:focus {
   border-color: #10B981;
 }
 
+
+.auth-full-screen {
+  position: absolute; /* Позиционируем абсолютно, чтобы они могли накладываться */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex; /* Делаем его flex-контейнером для центрирования содержимого */
+  flex-direction: column;
+  justify-content: center; /* Центрирует содержимое (auth-section) по вертикали */
+  align-items: center; /* Центрирует содержимое (auth-section) по горизонтали */
+  z-index: 2; /* Будет выше фона, но ниже языка */
+  padding: 20px; /* Добавляем паддинг здесь, чтобы содержимое не прилипало к краям экрана */
+  box-sizing: border-box;
+}
+
 /* Common Auth Section Styling */
 .auth-section {
-  /* Уберем фиксированную ширину и центрирование через align-items: center */
-  /* Вместо этого, дадим ему flex-grow, чтобы он занимал доступное пространство */
-  flex-grow: 1; /* Позволяет секции расти и занимать доступное пространство внутри flex-контейнера */
-  width: 100%; /* Занимает всю ширину родителя .registration-full-screen */
-  max-width: 500px; /* Ограничиваем максимальную ширину для содержимого формы */
-  
-  background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white card */
+  background-color: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
   padding: 24px;
+  width: 90%; /* Занимает 90% ширины родителя (.auth-full-screen) */
+  max-width: 400px; /* Но не более 400px */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  
-  display: flex; /* Делаем его flex-контейнером для содержимого формы */
+  display: flex;
   flex-direction: column;
-  justify-content: center; /* Центрирует содержимое формы вертикально внутри этой секции */
-  align-items: center; /* Центрирует содержимое формы горизонтально внутри этой секции */
-  
-  position: relative; /* Для абсолютного позиционирования кнопки "назад" */
-  z-index: 5; /* Убедимся, что карточки поверх фона */
-  
-  /* Добавим отступы, чтобы контент не прилипал к краям экрана на очень маленьких устройствах */
-  margin: 20px auto; /* Центрирует блок и дает вертикальные отступы */
+  align-items: center;
+  position: relative;
+  z-index: 5; /* Внутри .auth-full-screen, карточка выше фона */
 }
 
 .auth-logo {
