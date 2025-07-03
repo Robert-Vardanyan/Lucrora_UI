@@ -350,15 +350,17 @@ select:focus {
 .form-content-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Промежуток между группами форм */
-  width: 90%; /* Занимает 90% ширины родителя */
+  gap: 10px;
+  width: 100%; /* Занимает 100% ширины родителя .auth-full-screen */
   max-width: 400px; /* Ограничиваем максимальную ширину */
-  background-color: rgba(255, 255, 255, 0.1); /* Легкая прозрачность для фона полей ввода/кнопок */
+  background-color: rgba(255, 255, 255, 0.1);
   padding: 24px;
   border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* Небольшая тень для визуального отделения */
-  backdrop-filter: blur(5px); /* Эффект размытия фона за элементами формы */
-  -webkit-backdrop-filter: blur(5px); /* Для Safari */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  margin-bottom: auto; /* Прижимает форму вверх, если она не занимает всю высоту */
+  margin-top: 20px; /* Небольшой отступ от заголовка или верхнего края */
 }
 
 
@@ -370,12 +372,34 @@ select:focus {
   height: 100%;
   display: flex;
   flex-direction: column; /* Элементы будут располагаться вертикально */
-  justify-content: center; /* Начнём с верха */
+  justify-content: space-between; /* Начнём с верха */
   align-items: center; /* Центрируем по горизонтали */
   z-index: 2;
   padding: 20px; /* Добавляем паддинг, чтобы контент не прилипал к краям */
   box-sizing: border-box;
-  padding-bottom: 20px;
+}
+
+.auth-top-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Центрирует логотип и заголовок относительно друг друга */
+  width: 100%;
+  max-width: 400px; /* Ограничьте ширину, чтобы не было слишком широким */
+  /* margin-top: auto; /* Может быть использован, если нужно прижать к верху, но justify-content: space-between справится */
+  padding-top: 60px; /* Небольшой отступ от верхнего края экрана */
+}
+
+.auth-full-screen h1 {
+    margin-bottom: 0; /* Убираем лишний margin-bottom, так как gap будет управлять */
+}
+
+.auth-screen-title {
+    margin-top: 60px; /* Отступ сверху для заголовка формы */
+    margin-bottom: auto; /* Прижимает заголовок вверх, оставляя пространство для формы */
+    width: 100%;
+    max-width: 400px; /* Совпадает с шириной формы */
+    padding: 0 20px; /* Отступы по бокам */
+    box-sizing: border-box;
 }
 
 .auth-buttons-bottom-container {
@@ -385,7 +409,6 @@ select:focus {
   max-width: 400px; /* Ограничиваем максимальную ширину для кнопок, как для форм */
   padding: 0 20px; /* Горизонтальные паддинги, чтобы кнопки не прилипали к краям экрана */
   box-sizing: border-box;
-  margin-top: auto; /* ЭТО КЛЮЧЕВОЙ МОМЕНТ: прижимает контейнер кнопок к низу */
   margin-bottom: 40px; /* Расстояние от нижнего края экрана */
   gap: 16px; /* Расстояние между самими кнопками */
 }
@@ -393,16 +416,19 @@ select:focus {
 .auth-logo {
   max-width: 150px;
   height: auto;
-  margin-top: 40px; /* Отступ сверху для логотипа */
   margin-bottom: 24px; /* Отступ от логотипа до заголовка */
 }
 
 .auth-header {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Align back button to start */
-  margin-bottom: 20px;
+  justify-content: flex-start; /* Теперь только кнопка слева */
+  padding: 15px 20px;
+  box-sizing: border-box;
 }
 
 .auth-header h2 {
@@ -422,6 +448,7 @@ select:focus {
   top: 15px;
   padding: 5px;
   line-height: 1;
+  z-index: 10; /* Ensure it stays above other elements */
 }
 
 
