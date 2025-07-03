@@ -266,3 +266,219 @@ select:focus {
         border-radius: 0;
     }
 }
+
+
+
+
+/* Full screen wrapper for registration */
+.full-screen-auth-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto; /* Enable scrolling for forms if content overflows */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  background-color: white; /* Default background, will be overridden by .registration-full-screen */
+  z-index: 20; /* Ensure it's above other elements but below error overlay */
+  padding: 20px; /* Add some padding */
+  box-sizing: border-box; /* Include padding in element's total width and height */
+}
+
+/* Styling for the overall registration screen container */
+.registration-full-screen {
+  position: relative; /* For background positioning */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Hide overflow of background */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.registration-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('assets/svg/background.svg'); /* Update this path! */
+  background-size: cover; /* Cover the entire area */
+  background-position: center;
+  z-index: -1; /* Send it behind other content */
+}
+
+/* Language Selector */
+.language-selector {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.language-selector .lang-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.7);
+  color: #333;
+  font-weight: bold;
+  font-size: 0.8rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.language-selector .lang-btn.active {
+  background-color: #10B981; /* Tailwind green-500 */
+  color: white;
+  border-color: #10B981;
+}
+
+/* Common Auth Section Styling */
+.auth-section {
+  background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white card */
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px; /* Limit width for larger screens */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* For absolute positioning of back button */
+  z-index: 5; /* Ensure cards are above background */
+}
+
+.auth-logo {
+  width: 80px; /* Adjust as needed */
+  height: 80px;
+  margin-bottom: 20px;
+}
+
+.auth-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align back button to start */
+  margin-bottom: 20px;
+}
+
+.auth-header h2 {
+  flex-grow: 1; /* Allow title to take remaining space and center */
+  text-align: center;
+  margin-left: -24px; /* Adjust to visually center considering back button */
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #555;
+  cursor: pointer;
+  position: absolute; /* Position absolutely within .auth-section */
+  left: 15px;
+  top: 15px;
+  padding: 5px;
+  line-height: 1;
+}
+
+
+/* Form elements */
+.form-group {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #D1D5DB; /* Tailwind gray-300 */
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #3B82F6; /* Tailwind blue-500 */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+/* Checkbox group */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #6B7280; /* Tailwind gray-500 */
+}
+
+.checkbox-field {
+  margin-right: 10px;
+  /* Basic styling, consider custom checkbox for better appearance */
+}
+
+/* Buttons */
+.action-button {
+  background-color: #10B981; /* Tailwind green-500 */
+  color: white;
+  font-weight: bold;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-button:hover {
+  background-color: #059669; /* Tailwind green-600 */
+}
+
+.action-button:disabled {
+  background-color: #D1D5DB; /* Tailwind gray-300 */
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.secondary-button {
+  background-color: #E5E7EB; /* Tailwind gray-200 */
+  color: #374151; /* Tailwind gray-700 */
+  font-weight: bold;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.secondary-button:hover {
+  background-color: #D1D5DB; /* Tailwind gray-300 */
+}
+
+.full-width {
+  width: 100%;
+}
+
+.auth-link-text {
+  font-size: 0.9rem;
+  color: #6B7280;
+}

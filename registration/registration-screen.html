@@ -1,29 +1,94 @@
-<div class="screen">
-  <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Регистрация</h2>
-  <div class="registration-card bg-white rounded-xl shadow-md p-6 mb-4">
-    <div class="mb-4">
-      <label for="reg-username" class="block text-gray-700 text-sm font-medium mb-2">Имя пользователя:</label>
-      <input type="text" id="reg-username" placeholder="Введите ваше имя пользователя"
-        class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-    </div>
-    <div class="mb-4">
-      <label for="reg-password" class="block text-gray-700 text-sm font-medium mb-2">Пароль:</label>
-      <input type="password" id="reg-password" placeholder="Введите пароль"
-        class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-    </div>
-    <div class="mb-6">
-      <label for="reg-referral-code" class="block text-gray-700 text-sm font-medium mb-2">Реферальный код (необязательно):</label>
-      <input type="text" id="reg-referral-code" placeholder="Введите реферальный код"
-        class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-    </div>
-    <button id="register-btn"
-      class="action-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-      Зарегистрироваться
-    </button>
-    <p id="registration-message" class="text-center mt-4 text-sm hidden"></p>
+<div class="registration-full-screen">
+  <div class="registration-background"></div>
+
+  <div class="language-selector">
+    <button class="lang-btn active" data-lang="hy">ARM</button>
+    <button class="lang-btn" data-lang="en">ENG</button>
+    <button class="lang-btn" data-lang="ru">RUS</button>
   </div>
-  <button id="back-to-login-btn"
-    class="action-button mt-4 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
-    Уже есть аккаунт? Войти
-  </button>
+
+  <div id="initial-auth-choice" class="auth-section active">
+    <img src="assets/img/lucrora_logo.png" alt="Lucrora Logo" class="auth-logo">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Добро пожаловать в Lucrora!</h1>
+    <button id="btn-register-new" class="action-button full-width mb-4">Зарегистрировать новый аккаунт</button>
+    <button id="btn-already-have-account" class="secondary-button full-width">Уже есть аккаунт? Войти</button>
+  </div>
+
+  <div id="registration-form-section" class="auth-section hidden">
+    <div class="auth-header">
+      <button id="btn-back-from-registration" class="back-button">&times;</button>
+      <h2 class="text-xl font-bold text-gray-800 flex-grow text-center">Добро пожаловать в Lucrora</h2>
+    </div>
+
+    <div class="form-group">
+      <label for="reg-email">Email</label>
+      <input type="email" id="reg-email" placeholder="Ваш email" class="input-field">
+    </div>
+    <div class="form-group">
+      <label for="reg-password">Пароль</label>
+      <input type="password" id="reg-password" placeholder="Ваш пароль" class="input-field">
+    </div>
+    <div class="form-group">
+      <label for="reg-referral">Реферальный код (необязательно)</label>
+      <input type="text" id="reg-referral" placeholder="Введите код" class="input-field">
+    </div>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="agree-terms" class="checkbox-field">
+      <label for="agree-terms">Я согласен с <a href="#" class="text-blue-500">условиями использования</a></label>
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="email-promo" class="checkbox-field">
+      <label for="email-promo">Я согласен получать рекламные предложения на email</label>
+    </div>
+
+    <button id="btn-register-submit" class="action-button full-width mt-6" disabled>Зарегистрироваться</button>
+
+    <p class="auth-link-text mt-4">Не получили письмо подтверждения?
+      <a href="#" id="link-resend-email" class="text-blue-500">Отправить повторно</a>
+    </p>
+    <p class="auth-link-text mt-2">Уже есть аккаунт?
+      <a href="#" id="link-goto-login" class="text-blue-500">Войти</a>
+    </p>
+  </div>
+
+  <div id="login-form-section" class="auth-section hidden">
+    <div class="auth-header">
+      <button id="btn-back-from-login" class="back-button">&larr;</button>
+      <h2 class="text-xl font-bold text-gray-800 flex-grow text-center">Вход в Lucrora</h2>
+    </div>
+
+    <div class="form-group">
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" placeholder="Ваш email" class="input-field">
+    </div>
+    <div class="form-group">
+      <label for="login-password">Пароль</label>
+      <input type="password" id="login-password" placeholder="Ваш пароль" class="input-field">
+    </div>
+
+    <button id="btn-login-submit" class="action-button full-width mt-6" disabled>Войти</button>
+
+    <p class="auth-link-text mt-4">Забыли пароль?
+      <a href="#" id="link-forgot-password" class="text-blue-500">Восстановить</a>
+    </p>
+    <p class="auth-link-text mt-2">Нет аккаунта?
+      <a href="#" id="link-goto-register" class="text-blue-500">Зарегистрироваться</a>
+    </p>
+  </div>
+
+  <div id="resend-email-section" class="auth-section hidden">
+    <div class="auth-header">
+      <button id="btn-back-from-resend" class="back-button">&larr;</button>
+      <h2 class="text-xl font-bold text-gray-800 flex-grow text-center">Повторная отправка письма</h2>
+    </div>
+
+    <div class="form-group">
+      <label for="resend-email-input">Email</label>
+      <input type="email" id="resend-email-input" placeholder="Введите ваш email" class="input-field">
+    </div>
+
+    <button id="btn-resend-submit" class="action-button full-width mt-6" disabled>Отправить</button>
+  </div>
+
 </div>

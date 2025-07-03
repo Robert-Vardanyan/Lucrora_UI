@@ -1,27 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Helper function to get an element and log an error if not found
+  // Вспомогательная функция для получения элемента и логирования ошибки, если не найден
   const getElement = (id) => {
     const element = document.getElementById(id);
     if (!element) {
-      console.error(`Error: Element with ID '${id}' not found in DOM.`);
+      console.error(`Ошибка: Элемент с ID '${id}' не найден в DOM.`);
     }
     return element;
   };
 
-  // Get main UI sections
+  // Получаем основные разделы UI
   const loadingMessage = getElement('loading-message');
   const telegramPrompt = getElement('telegram-prompt');
-  const registrationScreen = getElement('registration-screen'); // NEW: Get registration screen
+  const registrationScreen = getElement('registration-screen'); // НОВЫЙ: Получаем контейнер для экрана регистрации
   const mainContentWrapper = getElement('main-content-wrapper');
   const screenContainer = getElement('screen-container');
 
-  // Get error overlay elements
+  // Получаем элементы оверлея ошибок
   const customErrorOverlay = getElement('custom-error-overlay');
   const errorTitle = getElement('error-title');
   const errorMessage = getElement('error-message');
   const errorCloseBtn = getElement('error-close-btn');
 
-  // Get navigation elements
+  // Получаем элементы навигации
   const navHome = getElement('nav-home');
   const navInvest = getElement('nav-invest');
   const navGames = getElement('nav-games');
@@ -29,76 +29,70 @@ document.addEventListener('DOMContentLoaded', () => {
   const navHistory = getElement('nav-history');
   const userProfileIcon = getElement('user-profile-icon');
 
-  // Balance elements in the header
-  const currentMainBalance = getElement('current-main-balance');
-  const currentBonusBalance = getElement('current-bonus-balance');
+  // Элементы баланса в заголовке (делаем их глобально доступными для обновления из других скриптов)
+  window.currentMainBalance = getElement('current-main-balance');
+  window.currentBonusBalance = getElement('current-bonus-balance');
 
-  // Current active screen script
+  // Текущий активный скрипт экрана
   let currentScreenScript = null;
 
-  // Initially hide all and show loading message
+  // Изначально скрываем все и показываем загрузочное сообщение
   if (loadingMessage) loadingMessage.classList.remove('hidden');
   if (telegramPrompt) telegramPrompt.classList.add('hidden');
-  if (registrationScreen) registrationScreen.classList.add('hidden'); // NEW: Hide registration initially
+  if (registrationScreen) registrationScreen.classList.add('hidden'); // НОВЫЙ: Скрываем экран регистрации по умолчанию
   if (mainContentWrapper) mainContentWrapper.classList.add('hidden');
   if (customErrorOverlay) customErrorOverlay.classList.add('hidden');
 
   /**
-   * Loads and displays the content of a specific screen.
-   * Also loads the corresponding JavaScript file.
-   * @param {string} screenName The name of the screen (e.g., 'home', 'invest').
+   * Загружает и отображает содержимое определенного экрана.
+   * Также загружает соответствующий JavaScript-файл.
+   * @param {string} screenName Имя экрана (например, 'home', 'invest', 'registration').
    */
   async function loadScreen(screenName) {
-    if (!screenContainer) {
-      console.error('Error: screen-container element not found.');
+    // Определяем, куда загружать HTML: в registrationScreen или в screenContainer
+    const targetContainer = (screenName === 'registration') ? registrationScreen : screenContainer;
+
+    if (!targetContainer) {
+      console.error(`Ошибка: Целевой контейнер для экрана '${screenName}' не найден.`);
       return;
     }
 
-    // Remove previous script if it exists
+    // Удаляем предыдущий скрипт, если он был
     if (currentScreenScript) {
       document.head.removeChild(currentScreenScript);
       currentScreenScript = null;
     }
 
     try {
-      // Load HTML content of the screen from the corresponding folder
+      // Загружаем HTML-содержимое экрана из соответствующей папки
       const htmlResponse = await fetch(`${screenName}/${screenName}-screen.html`);
       if (!htmlResponse.ok) {
-        throw new Error(`Failed to load ${screenName}/${screenName}-screen.html: ${htmlResponse.statusText}`);
+        throw new Error(`Не удалось загрузить ${screenName}/${screenName}-screen.html: ${htmlResponse.statusText}`);
       }
       const htmlContent = await htmlResponse.text();
+      targetContainer.innerHTML = htmlContent;
 
-      // NEW: Determine where to load the HTML content
-      const targetContainer = (screenName === 'registration') ? registrationScreen : screenContainer;
-      if (targetContainer) {
-        targetContainer.innerHTML = htmlContent;
-      } else {
-        console.error(`Error: Target container for ${screenName} not found.`);
-        return;
-      }
-
-
-      // Load corresponding JavaScript file from the corresponding folder
+      // Загружаем соответствующий JavaScript-файл из соответствующей папки
       const script = document.createElement('script');
       script.src = `${screenName}/${screenName}-script.js`;
       script.onload = () => {
-        console.log(`Script ${screenName}/${screenName}-script.js loaded.`);
-        // If the script has an initialization function, call it
+        console.log(`Скрипт ${screenName}/${screenName}-script.js загружен.`);
+        // Если у скрипта есть функция инициализации, вызываем ее
         if (window[`init${capitalizeFirstLetter(screenName)}Screen`]) {
           window[`init${capitalizeFirstLetter(screenName)}Screen`]();
         }
       };
       script.onerror = () => {
-        console.error(`Error loading script for ${screenName}/${screenName}-script.js`);
+        console.error(`Ошибка загрузки скрипта для ${screenName}/${screenName}-script.js`);
       };
       document.head.appendChild(script);
       currentScreenScript = script;
 
-      // Update active class for navigation items, if it's not the registration screen
-      if (screenName !== 'registration') {
+      // Обновляем активный класс для элементов навигации, только если это не экран регистрации/входа
+      if (screenName !== 'registration' && screenName !== 'login' && screenName !== 'resend-email') { // Добавлено 'login', 'resend-email'
         document.querySelectorAll('.nav-item').forEach(item => {
           item.classList.remove('active', 'text-green-600');
-          item.classList.add('text-gray-500'); // Reset color
+          item.classList.add('text-gray-500'); // Сброс цвета
         });
 
         let activeNavItem;
@@ -107,61 +101,64 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (screenName === 'games') activeNavItem = navGames;
         else if (screenName === 'referrals') activeNavItem = navReferrals;
         else if (screenName === 'history') activeNavItem = navHistory;
-        else if (screenName === 'profile') activeNavItem = userProfileIcon; // Profile is not in the bottom navigation but also activates
+        else if (screenName === 'profile') activeNavItem = userProfileIcon;
 
         if (activeNavItem) {
           activeNavItem.classList.add('active', 'text-green-600');
           activeNavItem.classList.remove('text-gray-500');
         }
       } else {
-        // If it's the registration screen, reset active navigation classes
+        // Если это экран регистрации/входа, сбрасываем активные классы навигации
         document.querySelectorAll('.nav-item').forEach(item => {
           item.classList.remove('active', 'text-green-600');
           item.classList.add('text-gray-500');
         });
       }
 
+
     } catch (error) {
-      console.error(`Error loading screen ${screenName}:`, error);
-      showError('Screen Loading Error', `Failed to load screen content "${screenName}". ${error.message}`);
+      console.error(`Ошибка при загрузке экрана ${screenName}:`, error);
+      showError('Ошибка загрузки экрана', `Не удалось загрузить содержимое экрана "${screenName}". ${error.message}`);
     }
   }
 
-  // Helper function to capitalize the first letter
+  // Вспомогательная функция для преобразования первой буквы в заглавную
   function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   /**
-   * Shows the error overlay.
-   * @param {string} title Error title.
-   * @param {string} message Detailed error message.
+   * Показывает оверлей с сообщением об ошибке.
+   * @param {string} title Заголовок ошибки.
+   * @param {string} message Подробное сообщение об ошибке.
    */
-  function showError(title, message) {
+  window.showError = function(title, message) { // Делаем глобальной для доступа из других скриптов
     if (loadingMessage) loadingMessage.classList.add('hidden');
     if (telegramPrompt) telegramPrompt.classList.add('hidden');
     if (mainContentWrapper) mainContentWrapper.classList.add('hidden');
-    if (registrationScreen) registrationScreen.classList.add('hidden'); // NEW: Hide registration screen on error
+    if (registrationScreen) registrationScreen.classList.add('hidden'); // НОВЫЙ: Скрываем экран регистрации при ошибке
     if (customErrorOverlay) customErrorOverlay.classList.remove('hidden');
 
-    // Safely set text content
+    // Безопасная установка текстового содержимого
     if (errorTitle) errorTitle.textContent = title;
     if (errorMessage) errorMessage.textContent = message;
-  }
+  };
 
   /**
-   * Hides the error overlay.
+   * Скрывает оверлей с сообщением об ошибке.
    */
   function hideError() {
     if (customErrorOverlay) customErrorOverlay.classList.add('hidden');
 
     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-      // After an error, return to the default screen
+      // После ошибки возвращаемся на экран, который должен быть по умолчанию
       if (window.appData && window.appData.isRegistered) {
         if (mainContentWrapper) mainContentWrapper.classList.remove('hidden');
+        if (registrationScreen) registrationScreen.classList.add('hidden'); // Убедиться, что экран регистрации скрыт
         loadScreen('home');
       } else {
-        if (registrationScreen) registrationScreen.classList.remove('hidden'); // NEW: Show registration if not registered
+        if (registrationScreen) registrationScreen.classList.remove('hidden'); // НОВЫЙ: Показываем экран регистрации, если не зарегистрирован
+        if (mainContentWrapper) mainContentWrapper.classList.add('hidden'); // Убедиться, что основной контент скрыт
         loadScreen('registration');
       }
     } else {
@@ -169,12 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Attach event listener to the error close button
+  // Прикрепляем слушатель событий к кнопке закрытия ошибки
   if (errorCloseBtn) {
     errorCloseBtn.addEventListener('click', hideError);
   }
 
-  // Check Telegram WebApp availability
+  // Проверяем доступность Telegram WebApp
   if (!window.Telegram || !window.Telegram.WebApp) {
     if (loadingMessage) loadingMessage.classList.add('hidden');
     if (telegramPrompt) telegramPrompt.classList.remove('hidden');
@@ -192,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const user = tg.initDataUnsafe.user;
   console.log("🟡 initData:", tg.initData);
 
-  // Load user data from your API
+  // Загружаем данные пользователя с вашего API
   fetch('https://lucrora-bot.onrender.com/api/init', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -201,57 +198,58 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(res => {
       if (!res.ok) {
         return res.json().then(err => {
-          console.error("🔴 Server responded with JSON error:", err);
-          throw new Error(err.message || `Server returned error: ${res.status}`);
+          console.error("🔴 Сервер ответил с JSON-ошибкой:", err);
+          throw new Error(err.message || `Сервер вернул ошибку: ${res.status}`);
         }).catch(() => {
-          console.error("🔴 Server responded with non-JSON error:", res.status, res.statusText);
-          throw new Error(`Server returned error: ${res.status} ${res.statusText}`);
+          console.error("🔴 Сервер ответил с не-JSON-ошибкой:", res.status, res.statusText);
+          throw new Error(`Сервер вернул ошибку: ${res.status} ${res.statusText}`);
         });
       }
       return res.json();
     })
     .then(data => {
-      console.log("🟢 Response from server:", data);
+      console.log("🟢 Ответ от сервера:", data);
       if (data.ok) {
-        // Safely update balances in the header
-        if (currentMainBalance) currentMainBalance.textContent = `₤ ${(data.main_balance || 0).toFixed(2)} LCR`;
-        if (currentBonusBalance) currentBonusBalance.textContent = `(Bonus: ${(data.bonus_balance || 0).toFixed(2)} ₤s)`;
+        // Безопасное обновление балансов в заголовке
+        if (window.currentMainBalance) window.currentMainBalance.textContent = `₤ ${(data.main_balance || 0).toFixed(2)} LCR`;
+        if (window.currentBonusBalance) window.currentBonusBalance.textContent = `(Bonus: ${(data.bonus_balance || 0).toFixed(2)} ₤s)`;
 
         if (loadingMessage) loadingMessage.classList.add('hidden');
-        window.loadScreen = loadScreen; // Make loadScreen globally available
-        window.appData = { // Make appData globally available
-          user: user,
-          balances: {
-            main: data.main_balance || 0,
-            bonus: data.bonus_balance || 0,
-            lucrum: data.lucrum_balance || 0,
-          },
-          totalInvested: data.total_invested || 0,
-          totalWithdrawn: data.total_withdrawn || 0,
-          isRegistered: data.isRegistered || false // IMPORTANT CHANGE: Add registration flag
+        window.loadScreen = loadScreen; // Делаем loadScreen доступной глобально
+        window.appData = { // Делаем appData доступной глобально
+            user: user,
+            balances: {
+                main: data.main_balance || 0,
+                bonus: data.bonus_balance || 0,
+                lucrum: data.lucrum_balance || 0,
+            },
+            totalInvested: data.total_invested || 0,
+            totalWithdrawn: data.total_withdrawn || 0,
+            isRegistered: data.isRegistered || false // <--- ВАЖНОЕ ИЗМЕНЕНИЕ: Добавляем флаг регистрации
         };
 
-        // IMPORTANT CHANGE: Check if the user is registered
+        // <--- ВАЖНОЕ ИЗМЕНЕНИЕ: Проверяем, зарегистрирован ли пользователь
         if (window.appData.isRegistered) {
-          if (mainContentWrapper) mainContentWrapper.classList.remove('hidden'); // Show main content
-          if (registrationScreen) registrationScreen.classList.add('hidden'); // Hide registration screen
-          loadScreen('home'); // If registered, go to home screen
+          if (mainContentWrapper) mainContentWrapper.classList.remove('hidden'); // Показываем основной контент
+          if (registrationScreen) registrationScreen.classList.add('hidden'); // Скрываем экран регистрации
+          loadScreen('home'); // Если зарегистрирован, переходим на домашний экран
         } else {
-          if (registrationScreen) registrationScreen.classList.remove('hidden'); // Show registration screen
-          if (mainContentWrapper) mainContentWrapper.classList.add('hidden'); // Hide main content
-          loadScreen('registration'); // If not registered, go to registration screen
+          if (registrationScreen) registrationScreen.classList.remove('hidden'); // Показываем экран регистрации
+          if (mainContentWrapper) mainContentWrapper.classList.add('hidden'); // Скрываем основной контент
+          loadScreen('registration'); // Если не зарегистрирован, переходим на экран регистрации
         }
 
       } else {
-        showError('Server Data Error', data.message || 'Server returned an error. Please try again.');
+        window.showError('Ошибка данных от сервера', data.message || 'Сервер вернул ошибку. Пожалуйста, попробуйте еще раз.');
       }
     })
     .catch(error => {
-      console.error("🔴 Request Error:", error);
-      showError('Server Connection Error', `Failed to connect to the server. ${error.message || 'Please check your internet connection or try again later.'}`);
+      console.error("🔴 Ошибка при запросе:", error);
+      window.showError('Ошибка соединения с сервером', `Не удалось подключиться к серверу. ${error.message || 'Пожалуйста, проверьте ваше интернет-соединение или попробуйте позже.'}`);
     });
 
-  // --- Navigation event listeners ---
+  // --- Слушатели событий навигации ---
+  // Эти слушатели будут работать только когда mainContentWrapper видим
   if (navHome) navHome.addEventListener('click', () => loadScreen('home'));
   if (navInvest) navInvest.addEventListener('click', () => loadScreen('invest'));
   if (navGames) navGames.addEventListener('click', () => loadScreen('games'));
@@ -259,12 +257,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (navHistory) navHistory.addEventListener('click', () => loadScreen('history'));
   if (userProfileIcon) userProfileIcon.addEventListener('click', () => loadScreen('profile'));
 
-  // NEW: Function to handle successful registration/login (call this from your registration-script.js)
+  // НОВЫЙ: Функция для обработки успешной регистрации/входа (вызывать из registration-script.js)
   window.onAuthSuccess = () => {
-    if (registrationScreen) registrationScreen.classList.add('hidden'); // Hide registration screen
-    if (mainContentWrapper) mainContentWrapper.classList.remove('hidden'); // Show main content
-    loadScreen('home'); // Load the home screen
-    // You might also want to re-fetch user data here to update balances etc.
-    // Or, pass the updated data from the registration process.
+    console.log('Аутентификация успешна, переходим в основное приложение.');
+    if (registrationScreen) registrationScreen.classList.add('hidden'); // Скрываем экран регистрации
+    if (mainContentWrapper) mainContentWrapper.classList.remove('hidden'); // Показываем основной контент
+    // Важно: Здесь нужно обновить балансы в шапке, либо перевызвать API init, либо передать данные из скрипта регистрации
+    // В примере registration-script.js я добавил обновление window.currentMainBalance и window.currentBonusBalance
+    loadScreen('home'); // Загружаем домашний экран
   };
 });
