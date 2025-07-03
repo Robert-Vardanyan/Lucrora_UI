@@ -1,6 +1,6 @@
 /* General Body and App Container Styles */
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif; /* Poppins */
     background-color: #f0f2f5; /* Light background */
     display: flex;
     justify-content: center;
@@ -311,6 +311,7 @@ select:focus {
   background-image: url('assets/svg/background.svg'); /* Update this path! */
   background-size: cover; /* Cover the entire area */
   background-position: center;
+  background-repeat: no-repeat;
   z-index: -1; /* Send it behind other content */
 }
 
