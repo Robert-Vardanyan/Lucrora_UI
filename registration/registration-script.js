@@ -1,9 +1,12 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Global function called by main.js after the HTML is loaded
+function initRegistrationScreen() {
+  console.log('Registration screen initialized.');
+
   // Utility function to get element and log error if not found
   const getElement = (id) => {
     const element = document.getElementById(id);
     if (!element) {
-      console.error(`Error: Element with ID '${id}' not found in DOM for registration script.`);
+      console.error(`Error: Element with ID '${id}' not found after registration screen load.`);
     }
     return element;
   };
@@ -22,7 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnBackFromRegistration = getElement('btn-back-from-registration');
   const regEmail = getElement('reg-email');
   const regPassword = getElement('reg-password');
+  const regReferral = getElement('reg-referral'); // Optional
   const agreeTerms = getElement('agree-terms');
+  const emailPromo = getElement('email-promo'); // Optional
   const btnRegisterSubmit = getElement('btn-register-submit');
   const linkResendEmail = getElement('link-resend-email');
   const linkGotoLogin = getElement('link-goto-login');
@@ -45,13 +50,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to show a specific section and hide others
   const showSection = (sectionToShow) => {
+    // Hide all sections first
     [initialAuthChoice, registrationFormSection, loginFormSection, resendEmailSection].forEach(section => {
       if (section) section.classList.add('hidden');
     });
+    // Show the desired section
     if (sectionToShow) sectionToShow.classList.remove('hidden');
   };
 
-  // --- Initial setup ---
+  // --- Initial setup (called on screen init) ---
   showSection(initialAuthChoice); // Show the initial choice screen by default
 
   // --- Event Listeners for Navigation ---
@@ -63,7 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Reset form fields
       if (regEmail) regEmail.value = '';
       if (regPassword) regPassword.value = '';
+      if (regReferral) regReferral.value = '';
       if (agreeTerms) agreeTerms.checked = false;
+      if (emailPromo) emailPromo.checked = false;
       updateRegisterButtonState();
     });
   }
@@ -87,8 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (btnBackFromResend) {
     btnBackFromResend.addEventListener('click', () => {
-      // Determine which form to go back to (registration or login)
-      // For simplicity, let's go back to registration by default or based on context
+      // Go back to the registration form from resend email screen
       showSection(registrationFormSection);
     });
   }
@@ -127,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Form Validation and Button Activation ---
 
   const validateEmail = (email) => {
+    // Simple email validation regex
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
@@ -154,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (regEmail) regEmail.addEventListener('input', updateRegisterButtonState);
   if (regPassword) regPassword.addEventListener('input', updateRegisterButtonState);
   if (agreeTerms) agreeTerms.addEventListener('change', updateRegisterButtonState);
+  if (regReferral) regReferral.addEventListener('input', updateRegisterButtonState); // Add listener for optional field too
 
   if (loginEmail) loginEmail.addEventListener('input', updateLoginButtonState);
   if (loginPassword) loginPassword.addEventListener('input', updateLoginButtonState);
@@ -164,9 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnRegisterSubmit) {
     btnRegisterSubmit.addEventListener('click', async () => {
-      // Simulate API call for registration
-      console.log('Registering user:', regEmail.value, regPassword.value);
-      // In a real app, you'd send data to your backend here
+      console.log('Attempting to register user:', regEmail.value);
       try {
         const response = await fetch('https://lucrora-bot.onrender.com/api/register', {
           method: 'POST',
@@ -177,8 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({
             email: regEmail.value,
             password: regPassword.value,
-            referral_code: getElement('reg-referral').value,
-            // You might need to send Telegram user data here as well
+            referral_code: regReferral ? regReferral.value : '', // Get referral code
             telegram_user_id: window.Telegram.WebApp.initDataUnsafe?.user?.id
           })
         });
@@ -187,21 +194,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (response.ok && data.ok) {
           console.log('Registration successful:', data);
-          // Update appData and transition to main app
           if (window.appData) {
             window.appData.isRegistered = true;
-            window.appData.balances.main = data.main_balance || 0; // Update balances from response
+            window.appData.balances.main = data.main_balance || 0;
             window.appData.balances.bonus = data.bonus_balance || 0;
-            // Potentially update header elements directly if they are globally accessible or reload them
+            // Update header balances directly
             if (window.currentMainBalance) window.currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
             if (window.currentBonusBalance) window.currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
           }
           if (window.onAuthSuccess) {
-            window.onAuthSuccess(); // Call global handler from main.js
+            window.onAuthSuccess(); // Call global handler from main.js to switch to main app
           }
         } else {
           console.error('Registration failed:', data.message || 'Unknown error');
-          // Show custom error overlay
           if (window.showError) {
             window.showError('Ошибка регистрации', data.message || 'Произошла ошибка при регистрации. Пожалуйста, попробуйте еще раз.');
           }
@@ -217,14 +222,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnLoginSubmit) {
     btnLoginSubmit.addEventListener('click', async () => {
-      // Simulate API call for login
-      console.log('Logging in user:', loginEmail.value, loginPassword.value);
+      console.log('Attempting to log in user:', loginEmail.value);
       try {
-        const response = await fetch('https://lucrora-bot.onrender.com/api/login', { // Adjust API endpoint
+        const response = await fetch('https://lucrora-bot.onrender.com/api/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Telegram-Init-Data': window.Telegram.WebApp.initData // Send initData
+            'X-Telegram-Init-Data': window.Telegram.WebApp.initData
           },
           body: JSON.stringify({
             email: loginEmail.value,
@@ -237,16 +241,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (response.ok && data.ok) {
           console.log('Login successful:', data);
-          // Update appData and transition to main app
           if (window.appData) {
             window.appData.isRegistered = true;
-            window.appData.balances.main = data.main_balance || 0; // Update balances from response
+            window.appData.balances.main = data.main_balance || 0;
             window.appData.balances.bonus = data.bonus_balance || 0;
+            // Update header balances directly
             if (window.currentMainBalance) window.currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
             if (window.currentBonusBalance) window.currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
           }
           if (window.onAuthSuccess) {
-            window.onAuthSuccess(); // Call global handler from main.js
+            window.onAuthSuccess();
           }
         } else {
           console.error('Login failed:', data.message || 'Unknown error');
@@ -266,9 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnResendSubmit) {
     btnResendSubmit.addEventListener('click', async () => {
       console.log('Resending email to:', resendEmailInput.value);
-      // Simulate API call for resending email
       try {
-        const response = await fetch('https://lucrora-bot.onrender.com/api/resend_email', { // Adjust API endpoint
+        const response = await fetch('https://lucrora-bot.onrender.com/api/resend_email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -296,19 +299,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Language Switcher ---
-  if (langButtons) {
+  if (langButtons.length > 0) { // Check if any language buttons exist
     langButtons.forEach(button => {
       button.addEventListener('click', () => {
         const selectedLang = button.dataset.lang;
         langButtons.forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
         console.log(`Language set to: ${selectedLang}`);
-        // Here you would implement logic to change the app's language
-        // This might involve:
-        // 1. Storing the preference (e.g., in localStorage or on your backend)
-        // 2. Reloading text content on the page (if not dynamically loaded via i18n library)
-        // 3. Potentially reloading the screen with new language content
-        // For a full app, consider an i18n library (e.g., i18next)
+        // Implement language change logic here
+        // For a simple example, you could store it in localStorage:
+        // localStorage.setItem('appLang', selectedLang);
+        // For a full app, you'd use an i18n library to update texts.
       });
     });
   }
@@ -317,17 +318,4 @@ document.addEventListener('DOMContentLoaded', () => {
   updateRegisterButtonState();
   updateLoginButtonState();
   updateResendButtonState();
-});
-
-// This function will be called by main.js after this script is loaded
-// You can use it to perform any screen-specific initializations
-function initRegistrationScreen() {
-  console.log('Registration screen initialized.');
-  // Any setup specific to when the registration screen is loaded
-  // (e.g., showing the initial choice, resetting form states)
-  const initialAuthChoice = document.getElementById('initial-auth-choice');
-  if (initialAuthChoice) initialAuthChoice.classList.remove('hidden');
-  document.getElementById('registration-form-section')?.classList.add('hidden');
-  document.getElementById('login-form-section')?.classList.add('hidden');
-  document.getElementById('resend-email-section')?.classList.add('hidden');
 }
