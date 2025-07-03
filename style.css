@@ -298,7 +298,7 @@ select:focus {
   justify-content: center;
   align-items: center;
   overflow: hidden; /* Hide overflow of background */
-  padding: 20px;
+  /* padding: 20px; */
   box-sizing: border-box;
 }
 
