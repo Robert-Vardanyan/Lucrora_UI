@@ -284,7 +284,6 @@ select:focus {
   align-items: center; /* Center content horizontally */
   background-color: white; /* Default background, will be overridden by .registration-full-screen */
   z-index: 20; /* Ensure it's above other elements but below error overlay */
-  /* padding: 20px; Add some padding */
   box-sizing: border-box; /* Include padding in element's total width and height */
 }
 
@@ -298,7 +297,6 @@ select:focus {
   justify-content: center;
   align-items: center;
   overflow: hidden; /* Hide overflow of background */
-  /* padding: 20px; */
   box-sizing: border-box;
 }
 
@@ -318,10 +316,10 @@ select:focus {
 /* Language Selector */
 .language-selector {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 10px;
+  right: 10px;
   display: flex;
-  gap: 8px;
+  gap: 10px;
   z-index: 10;
 }
 
@@ -345,17 +343,27 @@ select:focus {
 
 /* Common Auth Section Styling */
 .auth-section {
+  /* Уберем фиксированную ширину и центрирование через align-items: center */
+  /* Вместо этого, дадим ему flex-grow, чтобы он занимал доступное пространство */
+  flex-grow: 1; /* Позволяет секции расти и занимать доступное пространство внутри flex-контейнера */
+  width: 100%; /* Занимает всю ширину родителя .registration-full-screen */
+  max-width: 500px; /* Ограничиваем максимальную ширину для содержимого формы */
+  
   background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white card */
   border-radius: 16px;
   padding: 24px;
-  width: 90%;
-  max-width: 400px; /* Limit width for larger screens */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  display: flex;
+  
+  display: flex; /* Делаем его flex-контейнером для содержимого формы */
   flex-direction: column;
-  align-items: center;
-  position: relative; /* For absolute positioning of back button */
-  z-index: 5; /* Ensure cards are above background */
+  justify-content: center; /* Центрирует содержимое формы вертикально внутри этой секции */
+  align-items: center; /* Центрирует содержимое формы горизонтально внутри этой секции */
+  
+  position: relative; /* Для абсолютного позиционирования кнопки "назад" */
+  z-index: 5; /* Убедимся, что карточки поверх фона */
+  
+  /* Добавим отступы, чтобы контент не прилипал к краям экрана на очень маленьких устройствах */
+  margin: 20px auto; /* Центрирует блок и дает вертикальные отступы */
 }
 
 .auth-logo {
