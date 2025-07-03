@@ -5,23 +5,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lucrum Mini App</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Link to the external CSS file -->
   <link rel="stylesheet" href="style.css">
-  <!-- Telegram WebApp Script -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
 <body>
   <div id="app" class="app-container">
-    <!-- Loading message (initially visible) -->
     <div id="loading-message" class="loading-screen">
       <div class="spinner"></div>
-      <p class="text-gray-600 mt-4">Загрузка...</p>
+      <p class="text-gray-600 mt-4">Загрузка</p>
     </div>
 
-    <!-- Telegram Prompt (initially hidden, shown if not in Telegram) -->
     <div id="telegram-prompt" class="hidden telegram-prompt-screen">
       <svg class="w-24 h-24 text-blue-500 mb-6" fill="currentColor" viewBox="0 0 24 24">
         <path
@@ -37,9 +32,10 @@
       </a>
     </div>
 
-    <!-- Main Content Wrapper (hidden until Telegram validation passes) -->
+    <div id="registration-screen" class="hidden full-screen-auth-wrapper">
+      </div>
+
     <div id="main-content-wrapper" class="hidden flex flex-col h-full w-full">
-      <!-- Top Header -->
       <header
         class="top-header fixed top-0 left-0 w-full bg-white shadow-sm p-4 flex justify-between items-center z-10 rounded-b-xl">
         <div class="text-lg font-bold text-gray-800">Lucrora</div>
@@ -55,12 +51,9 @@
         </div>
       </header>
 
-      <!-- Screen Container - Content will be loaded here dynamically -->
       <div id="screen-container" class="screen-container flex-grow overflow-y-auto p-4 pt-20 pb-20">
-        <!-- Dynamic screen content will be loaded here by main.js -->
-      </div>
+        </div>
 
-      <!-- Bottom Navigation Bar -->
       <nav
         class="bottom-nav-bar fixed bottom-0 left-0 w-full bg-white shadow-lg p-3 flex justify-around items-center z-10 rounded-t-xl">
         <div id="nav-home" class="nav-item flex flex-col items-center cursor-pointer text-green-600">
@@ -105,7 +98,6 @@
     </div>
   </div>
 
-  <!-- Custom Error Overlay (initially hidden) -->
   <div id="custom-error-overlay"
     class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="error-card bg-white rounded-2xl shadow-xl p-8 text-center max-w-sm w-11/12">
@@ -121,7 +113,6 @@
     </div>
   </div>
 
-  <!-- Link to the main JavaScript file -->
   <script src="main.js"></script>
 </body>
 

@@ -40,10 +40,25 @@ body {
     padding: 1rem;
 }
 
+
+.full-screen-auth-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex; /* Or whatever layout you need for your auth screen */
+  justify-content: center;
+  align-items: center;
+  background-color: white; /* Or your desired background */
+  z-index: 20; /* Ensure it's above other elements but below error overlay */
+}
+
+
 /* Spinner for Loading */
 .spinner {
     border: 4px solid rgba(0, 0, 0, 0.1);
-    border-top: 4px solid #28a745; /* Green spinner */
+    border-top: 4px solid #007bb5; /* Blue spinner */
     border-radius: 50%;
     width: 40px;
     height: 40px;
