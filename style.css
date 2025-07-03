@@ -284,7 +284,7 @@ select:focus {
   align-items: center; /* Center content horizontally */
   background-color: white; /* Default background, will be overridden by .registration-full-screen */
   z-index: 20; /* Ensure it's above other elements but below error overlay */
-  padding: 20px; /* Add some padding */
+  /* padding: 20px; Add some padding */
   box-sizing: border-box; /* Include padding in element's total width and height */
 }
 
