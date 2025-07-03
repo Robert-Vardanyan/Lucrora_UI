@@ -1,0 +1,51 @@
+<div class="screen">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">Ваша Реферальная Система</h2>
+  <div class="referral-link-card bg-white rounded-xl shadow-md p-4 mb-4">
+    <p class="text-lg font-semibold text-gray-700 mb-2">Ваша Реферальная Ссылка:</p>
+    <div class="flex items-center bg-gray-100 rounded-md p-3 mb-3">
+      <input type="text" id="referral-link-input"
+        class="flex-grow bg-transparent border-none outline-none text-gray-700"
+        value="https://t.me/YourBot?start=ref_[YOUR_ID]" readonly>
+      <button id="copy-referral-link-btn"
+        class="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md transition duration-300">
+        Копировать
+      </button>
+    </div>
+    <button id="share-referral-link-btn"
+      class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+      Поделиться
+    </button>
+  </div>
+
+  <div class="summary-card bg-white rounded-xl shadow-md p-4 mb-4">
+    <p class="text-lg font-semibold text-gray-700">Заработано от рефералов: <span
+        id="referral-earnings">₤0.00</span></p>
+    <p class="text-lg font-semibold text-gray-700">Активных рефералов: <span
+        id="active-referrals-count">0</span></p>
+  </div>
+
+  <h3 class="text-xl font-bold text-gray-800 mb-4">Ваша Реферальная Сеть</h3>
+  <div id="referral-network-list" class="space-y-4">
+    <div class="referral-level-card bg-white rounded-xl shadow-md p-4">
+      <p class="text-lg font-semibold text-gray-800 mb-2">Уровень 1 (Ваши прямые рефералы)</p>
+      <ul class="list-disc list-inside text-gray-600 mb-2">
+        <li>User123 - ₤5.20</li>
+        <li>User456 - ₤3.10</li>
+      </ul>
+      <p class="text-sm text-gray-700">Заработано с уровня: <span class="font-semibold">₤8.30</span> (0.5% от их
+        дохода)</p>
+    </div>
+    <div class="referral-level-card bg-white rounded-xl shadow-md p-4">
+      <p class="text-lg font-semibold text-gray-800 mb-2">Уровень 2 (Рефералы Ваших рефералов)</p>
+      <ul class="list-disc list-inside text-gray-600 mb-2">
+        <li>User789 - ₤2.50</li>
+      </ul>
+      <p class="text-sm text-gray-700">Заработано с уровня: <span class="font-semibold">₤5.00</span> (0.4% от их
+        дохода)</p>
+    </div>
+  </div>
+  <button
+    class="action-button mt-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+    Маркетинговые Материалы
+  </button>
+</div>

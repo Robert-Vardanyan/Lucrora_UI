@@ -1,0 +1,36 @@
+<div class="screen">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">Выберите Метод Пополнения</h2>
+  <div class="deposit-method-card bg-white rounded-xl shadow-md p-4 mb-4">
+    <h3 class="text-xl font-bold text-gray-800 mb-2">LCR (TRC20)</h3>
+    <div
+      class="qr-code-placeholder bg-gray-200 w-32 h-32 mx-auto rounded-md flex items-center justify-center text-gray-500 mb-4">
+      [QR-код]
+    </div>
+    <p class="text-gray-600 mb-2">Адрес кошелька:</p>
+    <div class="flex items-center bg-gray-100 rounded-md p-3 mb-3">
+      <input type="text" id="LCR-address-input"
+        class="flex-grow bg-transparent border-none outline-none text-gray-700" value="TXc...xyz" readonly>
+      <button id="copy-LCR-address-btn"
+        class="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md transition duration-300">
+        Копировать
+      </button>
+    </div>
+    <p class="text-sm text-gray-600 mb-2">Минимальная сумма: <span class="font-semibold">10 LCR</span></p>
+    <div class="warning-box bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
+      <p class="font-bold">Важно:</p>
+      <p>Отправляйте только LCR (TRC20). Отправка других активов приведет к потере средств.</p>
+    </div>
+    <label for="txid-input" class="block text-gray-700 text-sm font-medium mb-2">Введите TXID (хэш
+      транзакции):</label>
+    <input type="text" id="txid-input" placeholder="Введите TXID"
+      class="w-full p-2 border border-gray-300 rounded-md mb-4">
+    <button
+      class="action-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+      Я оплатил
+    </button>
+  </div>
+  <button
+    class="action-button mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+    Как это работает? / Инструкция по пополнению
+  </button>
+</div>

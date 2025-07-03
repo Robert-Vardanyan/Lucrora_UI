@@ -1,0 +1,33 @@
+<div class="screen">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">Вывод Средств</h2>
+  <div class="withdrawal-card bg-white rounded-xl shadow-md p-4 mb-4">
+    <p class="text-lg font-semibold text-gray-700 mb-4">Ваш текущий баланс: <span
+        id="current-withdrawal-balance" class="text-green-600">₤0.00 LCR</span></p>
+
+    <label for="withdrawal-amount-input" class="block text-gray-700 text-sm font-medium mb-2">Сумма
+      вывода:</label>
+    <input type="number" id="withdrawal-amount-input" placeholder="0.00"
+      class="w-full p-2 border border-gray-300 rounded-md mb-4">
+
+    <label for="withdrawal-address-input" class="block text-gray-700 text-sm font-medium mb-2">Адрес Вашего LCR
+      (TRC20) кошелька:</label>
+    <input type="text" id="withdrawal-address-input" placeholder="Введите адрес кошелька"
+      class="w-full p-2 border border-gray-300 rounded-md mb-4">
+
+    <p class="text-gray-600 mb-2">Комиссия за вывод: <span id="withdrawal-fee" class="font-semibold">0%</span>
+    </p>
+    <p class="text-lg font-bold text-gray-800 mb-4">Итого к получению: <span id="total-received"
+        class="text-green-600">₤0.00</span></p>
+
+    <div class="warning-box bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
+      <p class="font-bold">Важно:</p>
+      <p>Убедитесь, что адрес кошелька верный. Средства отправляются только на LCR (TRC20). Выводы
+        обрабатываются в течение 24 часов.</p>
+    </div>
+    <button id="submit-withdrawal-btn"
+      class="action-button w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl transition duration-300 ease-in-out shadow-lg">
+      Отправить Заявку на Вывод
+    </button>
+    <p class="text-sm text-gray-500 mt-2">Минимальная сумма вывода: <span class="font-semibold">₤10</span></p>
+  </div>
+</div>
