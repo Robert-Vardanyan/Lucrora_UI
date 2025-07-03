@@ -1,0 +1,36 @@
+<div class="screen">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">История Операций</h2>
+  <div class="filter-options mb-4">
+    <select id="transaction-filter" class="w-full p-2 border border-gray-300 rounded-md">
+      <option value="all">Все</option>
+      <option value="deposits">Пополнения</option>
+      <option value="withdrawals">Выводы</option>
+      <option value="earnings">Начисления</option>
+      <option value="games">Игры</option>
+    </select>
+  </div>
+  <div id="transactions-list" class="space-y-4">
+    <!-- Transaction items will be loaded here -->
+    <div class="transaction-item bg-white rounded-xl shadow-md p-4">
+      <p class="text-sm text-gray-500">01.07.2025, 14:30</p>
+      <p class="text-lg font-semibold text-gray-800">Пополнение</p>
+      <p class="text-gray-600">Описание: Пополнение на 100 LCR</p>
+      <p class="text-green-600 font-bold">+ ₤100.00</p>
+      <p class="text-sm text-gray-500">ID: #ABCDEF123</p>
+    </div>
+    <div class="transaction-item bg-white rounded-xl shadow-md p-4">
+      <p class="text-sm text-gray-500">01.07.2025, 15:00</p>
+      <p class="text-lg font-semibold text-gray-800">Начисление дохода</p>
+      <p class="text-gray-600">Описание: Доход по Bronze Plan</p>
+      <p class="text-green-600 font-bold">+ ₤1.50</p>
+    </div>
+    <div class="transaction-item bg-white rounded-xl shadow-md p-4">
+      <p class="text-sm text-gray-500">01.07.2025, 16:00</p>
+      <p class="text-lg font-semibold text-gray-800">Вывод средств</p>
+      <p class="text-gray-600">Описание: Вывод 50 LCR</p>
+      <p class="text-red-600 font-bold">- ₤50.00</p>
+      <p class="text-sm text-yellow-600">Статус: В обработке</p>
+      <p class="text-sm text-gray-500">ID: #GHIJKL456</p>
+    </div>
+  </div>
+</div>
