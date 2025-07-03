@@ -384,11 +384,16 @@ select:focus {
 .auth-top-content {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Центрирует логотип и заголовок относительно друг друга */
+  /* УДАЛИТЕ ЭТУ СТРОКУ, она некорректна: align-self: column; */
+  align-items: center; /* Центрирует логотип и заголовок друг относительно друга */
   width: 100%;
-  max-width: 400px; /* Ограничьте ширину, чтобы не было слишком широким */
-  /* margin-top: auto; /* Может быть использован, если нужно прижать к верху, но justify-content: space-between справится */
-  padding-top: 60px; /* Небольшой отступ от верхнего края экрана */
+  max-width: 400px;
+  
+  /* НОВЫЙ КЛЮЧЕВОЙ МОМЕНТ: margin-top: auto и margin-bottom: auto */
+  /* Это прижмет блок к центру по вертикали, если flex-container использует justify-content: space-between */
+  margin-top: auto; 
+  margin-bottom: auto; 
+
 }
 
 .auth-full-screen h1 {
@@ -419,7 +424,6 @@ select:focus {
   max-width: 150px;
   height: auto;
   margin-bottom: 24px; /* Отступ от логотипа до заголовка */
-  align-self: center; /* Центрирует логотип по горизонтали */
 }
 
 .auth-header {
