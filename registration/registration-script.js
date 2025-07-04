@@ -26,7 +26,7 @@ function initRegistrationScreen() {
     const regPassword = getElement('reg-password');
     const regReferral = getElement('reg-referral');
     const agreeTerms = getElement('agree-terms');
-    const emailPromo = getElement('reg-email-promo'); // Исправлено на id из HTML, если он есть
+    const emailPromo = getElement('reg-email-promo');
     const btnRegisterSubmit = getElement('btn-register-submit');
     const linkResendEmail = getElement('link-resend-email');
     const linkGotoLogin = getElement('link-goto-login');
@@ -48,16 +48,17 @@ function initRegistrationScreen() {
     // Language buttons
     const langButtons = document.querySelectorAll('.language-selector .lang-btn');
 
-    // --- Функция для SHA-256 хеширования (для фронтенда) ---
-    // Это не безопасное хеширование паролей, но скрывает их при передаче.
-    // Настоящее безопасное хеширование будет на бэкенде с помощью bcrypt.
+    // --- Функция для SHA-256 хеширования (удалена для пароля, но может быть оставлена для других целей) ---
+    // ВАЖНО: ЭТА ФУНКЦИЯ БОЛЬШЕ НЕ ИСПОЛЬЗУЕТСЯ ДЛЯ ХЕШИРОВАНИЯ ПАРОЛЯ, ПЕРЕДАВАЕМОГО НА БЭКЕНД
+    /*
     async function sha256(message) {
-        const msgBuffer = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer); // hash the message
-        const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
-        const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         return hexHash;
     }
+    */
 
     // Функция для показа конкретного "экрана" и скрытия остальных
     const showScreen = (screenToShow) => {
@@ -185,8 +186,8 @@ function initRegistrationScreen() {
         btnRegisterSubmit.addEventListener('click', async () => {
             console.log('Attempting to register user:', regEmail.value);
             try {
-                const telegramInitData = window.Telegram.WebApp.initData; // Получаем initData
-                const hashedPassword = await sha256(regPassword.value); // ХЕШИРУЕМ ПАРОЛЬ
+                const telegramInitData = window.Telegram.WebApp.initData;
+                const rawPassword = regPassword.value; // <--- Отправляем сырой пароль
 
                 const response = await fetch('https://lucrora-bot.onrender.com/api/register', {
                     method: 'POST',
@@ -195,7 +196,7 @@ function initRegistrationScreen() {
                     },
                     body: JSON.stringify({
                         username: regEmail.value,
-                        password: hashedPassword, // Отправляем хешированный пароль
+                        password: rawPassword, // <--- Отправляем сырой пароль
                         referralCode: regReferral ? regReferral.value : '',
                         telegramInitData: telegramInitData
                     })
@@ -219,12 +220,6 @@ function initRegistrationScreen() {
                     const currentBonusBalance = document.getElementById('current-bonus-balance');
                     if (currentMainBalance && window.appData) currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
                     if (currentBonusBalance && window.appData) currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
-
-                    if (registrationMessage) {
-                        registrationMessage.textContent = 'Регистрация прошла успешно! Вы будете перенаправлены на главный экран.';
-                        registrationMessage.classList.remove('hidden', 'text-red-600', 'text-gray-600');
-                        registrationMessage.classList.add('text-green-600');
-                    }
 
                     if (window.onAuthSuccess) {
                         setTimeout(() => {
@@ -265,8 +260,8 @@ function initRegistrationScreen() {
         btnLoginSubmit.addEventListener('click', async () => {
             console.log('Attempting to log in user:', loginEmail.value);
             try {
-                const telegramInitData = window.Telegram.WebApp.initData; // Получаем initData
-                const hashedPassword = await sha256(loginPassword.value); // ХЕШИРУЕМ ПАРОЛЬ
+                const telegramInitData = window.Telegram.WebApp.initData;
+                const rawPassword = loginPassword.value; // <--- Отправляем сырой пароль
 
                 const response = await fetch('https://lucrora-bot.onrender.com/api/login', {
                     method: 'POST',
@@ -275,7 +270,7 @@ function initRegistrationScreen() {
                     },
                     body: JSON.stringify({
                         username: loginEmail.value,
-                        password: hashedPassword, // Отправляем хешированный пароль
+                        password: rawPassword, // <--- Отправляем сырой пароль
                         telegramInitData: telegramInitData
                     })
                 });
