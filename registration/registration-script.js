@@ -22,7 +22,7 @@ function initRegistrationScreen() {
 
   // Registration Form elements
   const btnBackFromRegistration = getElement('btn-back-from-registration');
-  const regEmail = getElement('reg-email');
+  const regEmail = getElement('reg-email'); // Это поле будет использоваться как "username" на бэкенде
   const regPassword = getElement('reg-password');
   const regReferral = getElement('reg-referral');
   const agreeTerms = getElement('agree-terms');
@@ -33,7 +33,7 @@ function initRegistrationScreen() {
 
   // Login Form elements
   const btnBackFromLogin = getElement('btn-back-from-login');
-  const loginEmail = getElement('login-email');
+  const loginEmail = getElement('login-email'); // Это поле будет использоваться как "username" на бэкенде
   const loginPassword = getElement('login-password');
   const btnLoginSubmit = getElement('btn-login-submit');
   const linkForgotPassword = getElement('link-forgot-password');
@@ -136,7 +136,7 @@ function initRegistrationScreen() {
   const updateRegisterButtonState = () => {
     if (!btnRegisterSubmit || !regEmail || !regPassword || !agreeTerms) return;
     const isEmailValid = validateEmail(regEmail.value);
-    const isPasswordFilled = regPassword.value.length >= 6;
+    const isPasswordFilled = regPassword.value.length >= 6; // Пример: минимум 6 символов
     const isTermsAgreed = agreeTerms.checked;
     btnRegisterSubmit.disabled = !(isEmailValid && isPasswordFilled && isTermsAgreed);
   };
@@ -144,7 +144,7 @@ function initRegistrationScreen() {
   const updateLoginButtonState = () => {
     if (!btnLoginSubmit || !loginEmail || !loginPassword) return;
     const isEmailValid = validateEmail(loginEmail.value);
-    const isPasswordFilled = loginPassword.value.length >= 6;
+    const isPasswordFilled = loginPassword.value.length >= 6; // Пример: минимум 6 символов
     btnLoginSubmit.disabled = !(isEmailValid && isPasswordFilled);
   };
 
@@ -157,29 +157,34 @@ function initRegistrationScreen() {
   if (regEmail) regEmail.addEventListener('input', updateRegisterButtonState);
   if (regPassword) regPassword.addEventListener('input', updateRegisterButtonState);
   if (agreeTerms) agreeTerms.addEventListener('change', updateRegisterButtonState);
-  if (regReferral) regReferral.addEventListener('input', updateRegisterButtonState);
+  if (regReferral) regReferral.addEventListener('input', updateRegisterButtonState); // Добавил для полноты, хотя не влияет на disabled
 
   if (loginEmail) loginEmail.addEventListener('input', updateLoginButtonState);
   if (loginPassword) loginPassword.addEventListener('input', updateLoginButtonState);
 
   if (resendEmailInput) resendEmailInput.addEventListener('input', updateResendButtonState);
 
-  // --- Submission Handlers (Simulated) ---
+  // --- Submission Handlers ---
+
+  // Handler for Registration
   if (btnRegisterSubmit) {
     btnRegisterSubmit.addEventListener('click', async () => {
       console.log('Attempting to register user:', regEmail.value);
       try {
+        const telegramInitData = window.Telegram.WebApp.initData; // Получаем initData
+
         const response = await fetch('https://lucrora-bot.onrender.com/api/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Telegram-Init-Data': window.Telegram.WebApp.initData
+            // УДАЛЕНО: 'X-Telegram-Init-Data' заголовок
           },
           body: JSON.stringify({
-            email: regEmail.value,
+            username: regEmail.value, // ИЗМЕНЕНО: с 'email' на 'username'
             password: regPassword.value,
-            referral_code: regReferral ? regReferral.value : '',
-            telegram_user_id: window.Telegram.WebApp.initDataUnsafe?.user?.id
+            referralCode: regReferral ? regReferral.value : '', // ИЗМЕНЕНО: с 'referral_code' на 'referralCode'
+            telegramInitData: telegramInitData // ДОБАВЛЕНО: initData в тело запроса
+            // УДАЛЕНО: 'telegram_user_id'
           })
         });
         const data = await response.json();
@@ -187,43 +192,78 @@ function initRegistrationScreen() {
           console.log('Registration successful:', data);
           if (window.appData) {
             window.appData.isRegistered = true;
+            // Обновляем балансы из ответа, если они есть, иначе 0
             window.appData.balances.main = data.main_balance || 0;
             window.appData.balances.bonus = data.bonus_balance || 0;
-            if (window.currentMainBalance) window.currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
-            if (window.currentBonusBalance) window.currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
+            window.appData.balances.lucrum = data.lucrum_balance || 0;
+            window.appData.totalInvested = data.total_invested || 0;
+            window.appData.totalWithdrawn = data.total_withdrawn || 0;
+            // Обновляем имя пользователя в appData, если бэкенд его вернул
+            if (data.username) {
+                window.appData.user.first_name = data.username;
+            }
           }
-          if (window.onAuthSuccess) {
-            window.onAuthSuccess();
+
+          // Обновляем балансы в заголовке, если элементы доступны (они должны быть глобально доступны в main.js)
+          const currentMainBalance = document.getElementById('current-main-balance');
+          const currentBonusBalance = document.getElementById('current-bonus-balance');
+          if (currentMainBalance && window.appData) currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
+          if (currentBonusBalance && window.appData) currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
+
+          // Показываем сообщение об успехе
+          if (registrationMessage) {
+            registrationMessage.textContent = 'Регистрация прошла успешно! Вы будете перенаправлены на главный экран.';
+            registrationMessage.classList.remove('hidden', 'text-red-600', 'text-gray-600');
+            registrationMessage.classList.add('text-green-600');
           }
+
+          // Перенаправляем на домашний экран после успешной регистрации
+          setTimeout(() => {
+            if (window.loadScreen) {
+              window.loadScreen('home');
+            } else {
+              console.error("window.loadScreen не определен. Невозможно перенаправить.");
+            }
+          }, 2000);
+
         } else {
+          // Обработка ошибок регистрации
           console.error('Registration failed:', data.message || 'Unknown error');
-          if (window.showError) {
-            window.showError('Ошибка регистрации', data.message || 'Произошла ошибка при регистрации. Пожалуйста, попробуйте еще раз.');
+          if (registrationMessage) {
+            registrationMessage.textContent = `Ошибка: ${data.message || 'Произошла ошибка при регистрации. Пожалуйста, попробуйте еще раз.'}`;
+            registrationMessage.classList.remove('hidden', 'text-green-600', 'text-gray-600');
+            registrationMessage.classList.add('text-red-600');
           }
         }
       } catch (error) {
         console.error('Network or API error during registration:', error);
-        if (window.showError) {
-          window.showError('Ошибка соединения', 'Не удалось подключиться к серверу для регистрации. Проверьте ваше подключение.');
+        if (registrationMessage) {
+          registrationMessage.textContent = `Ошибка соединения: ${error.message || 'Не удалось подключиться к серверу для регистрации. Проверьте ваше подключение.'}`;
+          registrationMessage.classList.remove('hidden', 'text-green-600', 'text-gray-600');
+          registrationMessage.classList.add('text-red-600');
         }
       }
     });
   }
 
+  // Handler for Login
   if (btnLoginSubmit) {
     btnLoginSubmit.addEventListener('click', async () => {
       console.log('Attempting to log in user:', loginEmail.value);
       try {
+        const telegramInitData = window.Telegram.WebApp.initData; // Получаем initData
+
         const response = await fetch('https://lucrora-bot.onrender.com/api/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Telegram-Init-Data': window.Telegram.WebApp.initData
+            // УДАЛЕНО: 'X-Telegram-Init-Data' заголовок
           },
           body: JSON.stringify({
-            email: loginEmail.value,
+            username: loginEmail.value, // ИЗМЕНЕНО: с 'email' на 'username'
             password: loginPassword.value,
-            telegram_user_id: window.Telegram.WebApp.initDataUnsafe?.user?.id
+            telegramInitData: telegramInitData // ДОБАВЛЕНО: initData в тело запроса
+            // УДАЛЕНО: 'telegram_user_id'
           })
         });
         const data = await response.json();
@@ -233,12 +273,28 @@ function initRegistrationScreen() {
             window.appData.isRegistered = true;
             window.appData.balances.main = data.main_balance || 0;
             window.appData.balances.bonus = data.bonus_balance || 0;
-            if (window.currentMainBalance) window.currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
-            if (window.currentBonusBalance) window.currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
+            window.appData.balances.lucrum = data.lucrum_balance || 0;
+            window.appData.totalInvested = data.total_invested || 0;
+            window.appData.totalWithdrawn = data.total_withdrawn || 0;
+            if (data.username) {
+                window.appData.user.first_name = data.username;
+            }
           }
-          if (window.onAuthSuccess) {
-            window.onAuthSuccess();
-          }
+
+          const currentMainBalance = document.getElementById('current-main-balance');
+          const currentBonusBalance = document.getElementById('current-bonus-balance');
+          if (currentMainBalance && window.appData) currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
+          if (currentBonusBalance && window.appData) currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
+
+          // Перенаправляем на домашний экран после успешного входа
+          setTimeout(() => {
+            if (window.loadScreen) {
+              window.loadScreen('home');
+            } else {
+              console.error("window.loadScreen не определен. Невозможно перенаправить.");
+            }
+          }, 2000);
+
         } else {
           console.error('Login failed:', data.message || 'Unknown error');
           if (window.showError) {
@@ -254,17 +310,23 @@ function initRegistrationScreen() {
     });
   }
 
+  // Handler for Resend Email
   if (btnResendSubmit) {
     btnResendSubmit.addEventListener('click', async () => {
       console.log('Resending email to:', resendEmailInput.value);
       try {
+        const telegramInitData = window.Telegram.WebApp.initData; // Получаем initData
+
         const response = await fetch('https://lucrora-bot.onrender.com/api/resend_email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Telegram-Init-Data': window.Telegram.WebApp.initData
+            // УДАЛЕНО: 'X-Telegram-Init-Data' заголовок
           },
-          body: JSON.stringify({ email: resendEmailInput.value })
+          body: JSON.stringify({
+            email: resendEmailInput.value,
+            telegramInitData: telegramInitData // ДОБАВЛЕНО: initData в тело запроса
+          })
         });
         const data = await response.json();
         if (response.ok && data.ok) {
