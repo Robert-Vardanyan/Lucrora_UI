@@ -26,7 +26,7 @@ function initRegistrationScreen() {
     const regPassword = getElement('reg-password');
     const regReferral = getElement('reg-referral');
     const agreeTerms = getElement('agree-terms');
-    const emailPromo = getElement('email-promo');
+    const emailPromo = getElement('reg-email-promo'); // Исправлено на id из HTML, если он есть
     const btnRegisterSubmit = getElement('btn-register-submit');
     const linkResendEmail = getElement('link-resend-email');
     const linkGotoLogin = getElement('link-goto-login');
@@ -47,6 +47,17 @@ function initRegistrationScreen() {
 
     // Language buttons
     const langButtons = document.querySelectorAll('.language-selector .lang-btn');
+
+    // --- Функция для SHA-256 хеширования (для фронтенда) ---
+    // Это не безопасное хеширование паролей, но скрывает их при передаче.
+    // Настоящее безопасное хеширование будет на бэкенде с помощью bcrypt.
+    async function sha256(message) {
+        const msgBuffer = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer); // hash the message
+        const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+        const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+        return hexHash;
+    }
 
     // Функция для показа конкретного "экрана" и скрытия остальных
     const showScreen = (screenToShow) => {
@@ -160,7 +171,7 @@ function initRegistrationScreen() {
     if (regEmail) regEmail.addEventListener('input', updateRegisterButtonState);
     if (regPassword) regPassword.addEventListener('input', updateRegisterButtonState);
     if (agreeTerms) agreeTerms.addEventListener('change', updateRegisterButtonState);
-    if (regReferral) regReferral.addEventListener('input', updateRegisterButtonState); // Добавил для полноты, хотя не влияет на disabled
+    if (regReferral) regReferral.addEventListener('input', updateRegisterButtonState);
 
     if (loginEmail) loginEmail.addEventListener('input', updateLoginButtonState);
     if (loginPassword) loginPassword.addEventListener('input', updateLoginButtonState);
@@ -175,6 +186,7 @@ function initRegistrationScreen() {
             console.log('Attempting to register user:', regEmail.value);
             try {
                 const telegramInitData = window.Telegram.WebApp.initData; // Получаем initData
+                const hashedPassword = await sha256(regPassword.value); // ХЕШИРУЕМ ПАРОЛЬ
 
                 const response = await fetch('https://lucrora-bot.onrender.com/api/register', {
                     method: 'POST',
@@ -182,10 +194,10 @@ function initRegistrationScreen() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        username: regEmail.value, // ИЗМЕНЕНО: с 'email' на 'username'
-                        password: regPassword.value,
-                        referralCode: regReferral ? regReferral.value : '', // ИЗМЕНЕНО: с 'referral_code' на 'referralCode'
-                        telegramInitData: telegramInitData // ДОБАВЛЕНО: initData в тело запроса
+                        username: regEmail.value,
+                        password: hashedPassword, // Отправляем хешированный пароль
+                        referralCode: regReferral ? regReferral.value : '',
+                        telegramInitData: telegramInitData
                     })
                 });
                 const data = await response.json();
@@ -193,40 +205,33 @@ function initRegistrationScreen() {
                     console.log('Registration successful:', data);
                     if (window.appData) {
                         window.appData.isRegistered = true;
-                        // Обновляем балансы из ответа, если они есть, иначе 0
                         window.appData.balances.main = data.main_balance || 0;
                         window.appData.balances.bonus = data.bonus_balance || 0;
                         window.appData.balances.lucrum = data.lucrum_balance || 0;
                         window.appData.totalInvested = data.total_invested || 0;
                         window.appData.totalWithdrawn = data.total_withdrawn || 0;
-                        // Обновляем имя пользователя в appData, если бэкенд его вернул
                         if (data.username) {
                             window.appData.user.first_name = data.username;
                         }
                     }
 
-                    // Обновляем балансы в заголовке, если элементы доступны (они должны быть глобально доступны в main.js)
                     const currentMainBalance = document.getElementById('current-main-balance');
                     const currentBonusBalance = document.getElementById('current-bonus-balance');
                     if (currentMainBalance && window.appData) currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
                     if (currentBonusBalance && window.appData) currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
 
-                    // Показываем сообщение об успехе
                     if (registrationMessage) {
                         registrationMessage.textContent = 'Регистрация прошла успешно! Вы будете перенаправлены на главный экран.';
                         registrationMessage.classList.remove('hidden', 'text-red-600', 'text-gray-600');
                         registrationMessage.classList.add('text-green-600');
                     }
 
-                    // *** MODIFICATION START ***
-                    // Call the global onAuthSuccess function defined in main.js
                     if (window.onAuthSuccess) {
                         setTimeout(() => {
                             window.onAuthSuccess();
-                        }, 2000); // Give 2 seconds for message to show
+                        }, 2000);
                     } else {
                         console.error("window.onAuthSuccess is not defined. Cannot redirect.");
-                        // Fallback if onAuthSuccess isn't there
                         setTimeout(() => {
                             if (window.loadScreen) {
                                 window.loadScreen('home');
@@ -235,10 +240,8 @@ function initRegistrationScreen() {
                             }
                         }, 2000);
                     }
-                    // *** MODIFICATION END ***
 
                 } else {
-                    // Обработка ошибок регистрации
                     console.error('Registration failed:', data.message || 'Unknown error');
                     if (registrationMessage) {
                         registrationMessage.textContent = `Ошибка: ${data.message || 'Произошла ошибка при регистрации. Пожалуйста, попробуйте еще раз.'}`;
@@ -263,6 +266,7 @@ function initRegistrationScreen() {
             console.log('Attempting to log in user:', loginEmail.value);
             try {
                 const telegramInitData = window.Telegram.WebApp.initData; // Получаем initData
+                const hashedPassword = await sha256(loginPassword.value); // ХЕШИРУЕМ ПАРОЛЬ
 
                 const response = await fetch('https://lucrora-bot.onrender.com/api/login', {
                     method: 'POST',
@@ -270,9 +274,9 @@ function initRegistrationScreen() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        username: loginEmail.value, // ИЗМЕНЕНО: с 'email' на 'username'
-                        password: loginPassword.value,
-                        telegramInitData: telegramInitData // ДОБАВЛЕНО: initData в тело запроса
+                        username: loginEmail.value,
+                        password: hashedPassword, // Отправляем хешированный пароль
+                        telegramInitData: telegramInitData
                     })
                 });
                 const data = await response.json();
@@ -295,15 +299,12 @@ function initRegistrationScreen() {
                     if (currentMainBalance && window.appData) currentMainBalance.textContent = `₤ ${(window.appData.balances.main).toFixed(2)} LCR`;
                     if (currentBonusBalance && window.appData) currentBonusBalance.textContent = `(Bonus: ${(window.appData.balances.bonus).toFixed(2)} ₤s)`;
 
-                    // *** MODIFICATION START ***
-                    // Call the global onAuthSuccess function defined in main.js
                     if (window.onAuthSuccess) {
                         setTimeout(() => {
                             window.onAuthSuccess();
-                        }, 2000); // Give 2 seconds for message to show
+                        }, 2000);
                     } else {
                         console.error("window.onAuthSuccess is not defined. Cannot redirect.");
-                        // Fallback if onAuthSuccess isn't there
                         setTimeout(() => {
                             if (window.loadScreen) {
                                 window.loadScreen('home');
@@ -312,12 +313,11 @@ function initRegistrationScreen() {
                             }
                         }, 2000);
                     }
-                    // *** MODIFICATION END ***
 
                 } else {
                     console.error('Login failed:', data.message || 'Unknown error');
                     if (window.showError) {
-                        window.showError('Ошибка входа', data.message || 'Неправильный email или пароль.');
+                        window.showError('Ошибка входа', data.message || 'Неправильный username или пароль.'); // Обновил сообщение
                     }
                 }
             } catch (error) {
@@ -329,7 +329,7 @@ function initRegistrationScreen() {
         });
     }
 
-    // Handler for Resend Email
+    // Handler for Resend Email (no change needed here as it doesn't involve password)
     if (btnResendSubmit) {
         btnResendSubmit.addEventListener('click', async () => {
             console.log('Resending email to:', resendEmailInput.value);
